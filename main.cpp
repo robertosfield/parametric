@@ -4,6 +4,7 @@
 */
 
 #include <osg/ShapeDrawable>
+#include <osg/CullFace>
 
 #include <osgGA/StateSetManipulator>
 
@@ -12,6 +13,28 @@
 
 #include <osgViewer/Viewer>
 #include <osgViewer/ViewerEventHandlers>
+
+template<typename T>
+struct parameter_ptr
+{
+    typedef T element_type;
+    element_type* _ptr;
+
+    parameter_ptr():_ptr(0) {}
+
+    parameter_ptr(element_type* ptr):_ptr(ptr) {}
+
+    template<typename P>
+    parameter_ptr(osg::ref_ptr<P>& rptr):_ptr(rptr.get()) {}
+
+    T& operator*() const { return *_ptr; }
+    T* operator->() const { return _ptr; }
+    T* get() const { return _ptr; }
+
+    bool operator!() const   { return _ptr==0; } // not required
+    bool valid() const       { return _ptr!=0; }
+
+};
 
 
 osg::ref_ptr<osg::Geometry> createMesh(const osg::Vec3& origin, const osg::Vec3& uAxis, const osg::Vec3& vAxis, unsigned int uCells, unsigned vCells)
@@ -102,6 +125,42 @@ osg::ref_ptr<osg::Geometry> createMesh(const osg::Vec3& origin, const osg::Vec3&
     return geometry;
 }
 
+
+osg::ref_ptr<osg::Texture2D> createDepthTexture(unsigned int width, unsigned int height)
+{
+    osg::ref_ptr<osg::Texture2D> depthTexture = new osg::Texture2D;
+    depthTexture->setTextureSize(width, height);
+    depthTexture->setInternalFormat(GL_DEPTH_COMPONENT);
+    depthTexture->setFilter(osg::Texture2D::MIN_FILTER,osg::Texture2D::LINEAR);
+    depthTexture->setFilter(osg::Texture2D::MAG_FILTER,osg::Texture2D::LINEAR);
+    depthTexture->setWrap(osg::Texture2D::WRAP_S,osg::Texture2D::CLAMP_TO_BORDER);
+    depthTexture->setWrap(osg::Texture2D::WRAP_T,osg::Texture2D::CLAMP_TO_BORDER);
+    depthTexture->setBorderColor(osg::Vec4(1.0f,1.0f,1.0f,1.0f));
+    return depthTexture;
+}
+
+osg::ref_ptr<osg::Camera> createDepthCamera(parameter_ptr<osg::Texture> depthTexture)
+{
+    osg::ref_ptr<osg::Camera> camera = new osg::Camera;
+    camera->attach(osg::Camera::DEPTH_BUFFER, depthTexture.get());
+    camera->setViewport(0, 0, depthTexture->getTextureWidth(), depthTexture->getTextureHeight());
+
+    // clear the depth and colour bufferson each clear.
+    camera->setClearMask(GL_DEPTH_BUFFER_BIT);
+
+    // set the camera to render before the main camera.
+    camera->setRenderOrder(osg::Camera::PRE_RENDER);
+
+    // tell the camera to use OpenGL frame buffer object where supported.
+    camera->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT);
+
+    camera->setReferenceFrame(osg::Transform::RELATIVE_RF);
+    camera->setProjectionMatrix(osg::Matrixd::identity());
+    camera->setViewMatrix(osg::Matrixd::identity());
+
+    return camera;
+}
+
 void addShaders(osg::ArgumentParser& arguments, osg::StateSet* stateset)
 {
     std::string z_function;
@@ -151,41 +210,106 @@ int main(int argc, char** argv)
     viewer.addEventHandler(new osgViewer::StatsHandler());
     viewer.addEventHandler(new osgGA::StateSetManipulator(viewer.getCamera()->getOrCreateStateSet()));
 
+    unsigned int width=1280;
+    unsigned int height=1024;
 
     osg::ref_ptr<osg::Group> group = new osg::Group;
+
+    bool visibleBoundaries = false;
+    while(arguments.read("-b")) visibleBoundaries = true;
+
+    bool depthBoundaries = false;
+    while(arguments.read("-d")) depthBoundaries = true;
+
+    typedef std::vector< osg::ref_ptr<osg::Node> > Boundaries;
+    Boundaries boundaries;
 
     osg::Vec3 center;
     osg::Vec3 dimensions;
     while(arguments.read("--sphere", center.x(), center.y(), center.z(), dimensions.x()))
     {
-        group->addChild(new osg::ShapeDrawable(new osg::Sphere(center, dimensions.x())));
+        boundaries.push_back(new osg::ShapeDrawable(new osg::Sphere(center, dimensions.x())));
     }
 
     while(arguments.read("--box", center.x(), center.y(), center.z(), dimensions.x(), dimensions.y(), dimensions.z()))
     {
-        group->addChild(new osg::ShapeDrawable(new osg::Box(center, dimensions.x(), dimensions.y(), dimensions.z())));
+        boundaries.push_back(new osg::ShapeDrawable(new osg::Box(center, dimensions.x(), dimensions.y(), dimensions.z())));
     }
 
     while(arguments.read("--cone", center.x(), center.y(), center.z(), dimensions.x(), dimensions.y()))
     {
-        group->addChild(new osg::ShapeDrawable(new osg::Cone(center, dimensions.x(), dimensions.y())));
+        boundaries.push_back(new osg::ShapeDrawable(new osg::Cone(center, dimensions.x(), dimensions.y())));
     }
 
     while(arguments.read("--capsule", center.x(), center.y(), center.z(), dimensions.x(), dimensions.y()))
     {
-        group->addChild(new osg::ShapeDrawable(new osg::Capsule(center, dimensions.x(), dimensions.y())));
+        boundaries.push_back(new osg::ShapeDrawable(new osg::Capsule(center, dimensions.x(), dimensions.y())));
     }
 
     while(arguments.read("--cylinder", center.x(), center.y(), center.z(), dimensions.x(), dimensions.y()))
     {
-        group->addChild(new osg::ShapeDrawable(new osg::Cylinder(center, dimensions.x(), dimensions.y())));
+        boundaries.push_back(new osg::ShapeDrawable(new osg::Cylinder(center, dimensions.x(), dimensions.y())));
     }
 
     std::string modelFilename;
     while(arguments.read("--model", modelFilename))
     {
         osg::ref_ptr<osg::Node> model = osgDB::readRefNodeFile(modelFilename);
-        if (model) group->addChild(model);
+        if (model) boundaries.push_back(model);
+    }
+
+    if (visibleBoundaries)
+    {
+        for(Boundaries::iterator itr = boundaries.begin();
+            itr != boundaries.end();
+            ++itr)
+        {
+            group->addChild(*itr);
+        }
+    }
+
+    typedef std::vector< osg::ref_ptr<osg::Texture2D> > Textures;
+    Textures frontDepthTextures;
+    Textures backDepthTextures;
+
+    if (depthBoundaries)
+    {
+        for(Boundaries::iterator itr = boundaries.begin();
+            itr != boundaries.end();
+            ++itr)
+        {
+            osg::ref_ptr<osg::Node> boundarySubgraph = *itr;
+
+            // set up the depth texture for front face of the boundary
+            osg::ref_ptr<osg::Texture2D> frontDepthTexture = createDepthTexture(width, height);
+            osg::ref_ptr<osg::Camera> frontDepthCamera = createDepthCamera(frontDepthTexture);
+            frontDepthCamera->getOrCreateStateSet()->setAttributeAndModes(new osg::CullFace(osg::CullFace::BACK), osg::StateAttribute::ON);
+            frontDepthCamera->addChild(boundarySubgraph);
+            group->addChild(frontDepthCamera);
+            frontDepthTextures.push_back(frontDepthTexture);
+
+            // set up the depth texture for back face of the boundary
+            osg::ref_ptr<osg::Texture2D> backDepthTexture = createDepthTexture(width, height);
+            osg::ref_ptr<osg::Camera> backDepthCamera = createDepthCamera(backDepthTexture);
+            backDepthCamera->getOrCreateStateSet()->setAttributeAndModes(new osg::CullFace(osg::CullFace::BACK), osg::StateAttribute::ON);
+            backDepthCamera->addChild(boundarySubgraph);
+            group->addChild(backDepthCamera);
+            backDepthTextures.push_back(backDepthTexture);
+        }
+    }
+
+    for(Textures::iterator itr = frontDepthTextures.begin();
+        itr != frontDepthTextures.end();
+        ++itr)
+    {
+        OSG_NOTICE<<"Front depth texture"<<itr->get()<<std::endl;
+    }
+
+    for(Textures::iterator itr = backDepthTextures.begin();
+        itr != backDepthTextures.end();
+        ++itr)
+    {
+        OSG_NOTICE<<"Back depth texture"<<itr->get()<<std::endl;
     }
 
     osg::Vec3 origin(0.0, 0.0, 0.0);
