@@ -17,7 +17,6 @@ vec4 computePosition(float x, float y)
 
 vec3 computeNormal(float x, float y)
 {
-#if 1
     float delta = 0.001;
 
     float x_left = x-delta;
@@ -35,23 +34,7 @@ vec3 computeNormal(float x, float y)
 
     vec3 norm = cross(x_delta, y_delta);
     return normalize(norm);
-
-#else
-    if (x<0.5)
-    {
-        if (y<0.5) return normalize(vec3(-1.0, -1.0, 0.0));
-        else return normalize(vec3(-1.0, 1.0, 0.0));
-    }
-    else
-    {
-        if (y<0.5) return normalize(vec3(1.0, -1.0, 0.0));
-        else return normalize(vec3(1.0, 1.0, 0.0));
-    }
-#endif
-//    return normalize( vec3(-(z_right-z_left), -(z_above-z_below), delta*2.0 ) );
-//    return vec3(0.0,0.0,1.0);
 }
-
 #endif
 
 void main(void)
@@ -78,17 +61,11 @@ void main(void)
     vec4 ambient_color = vec4(0.1, 0.1, 0.1, 0.0);
     vec4 diffuse_color = vec4(0.9, 0.9, 0.9, 0.0);
 
-#if 1
     float intensity = dot(lightDir, n);
     if (intensity<0.0) color = ambient_color;
     else color = ambient_color + diffuse_color * intensity;
-#else
 
-    color.rgb = n;
-
-#endif
     color.a = 1.0;
-
 
 #else
     v = gl_Vertex;
