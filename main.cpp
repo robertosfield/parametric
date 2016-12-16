@@ -291,7 +291,7 @@ int main(int argc, char** argv)
             // set up the depth texture for back face of the boundary
             osg::ref_ptr<osg::Texture2D> backDepthTexture = createDepthTexture(width, height);
             osg::ref_ptr<osg::Camera> backDepthCamera = createDepthCamera(backDepthTexture);
-            backDepthCamera->getOrCreateStateSet()->setAttributeAndModes(new osg::CullFace(osg::CullFace::BACK), osg::StateAttribute::ON);
+            backDepthCamera->getOrCreateStateSet()->setAttributeAndModes(new osg::CullFace(osg::CullFace::FRONT), osg::StateAttribute::ON);
             backDepthCamera->addChild(boundarySubgraph);
             group->addChild(backDepthCamera);
             backDepthTextures.push_back(backDepthTexture);
