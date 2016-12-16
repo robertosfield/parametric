@@ -119,14 +119,13 @@ osg::ref_ptr<osg::Geometry> createMesh(const osg::Vec3& origin, const osg::Vec3&
 
 void addShaders(osg::ArgumentParser& arguments, osg::StateSet* stateset)
 {
-    std::string z_function = "(x, y) (x-x*x)*(y-y*y)*5.0";
+    std::string z_function;
+    while(arguments.read("--Z_FUNCTION",z_function)) { stateset->setDefine("Z_FUNCTION", z_function); }
 
-    while(arguments.read("--Z_FUNCTION",z_function)) {}
-    stateset->setDefine("Z_FUNCTION", z_function);
 
-    std::string visible_function = "(x, y) (Z_FUNCTION(x,y)>cutOff)";
-    while(arguments.read("--VISIBLE_FUNCTION",visible_function)) {}
-    stateset->setDefine("VISIBLE_FUNCTION", visible_function);
+    std::string visible_function;
+    while(arguments.read("--VISIBLE_FUNCTION",visible_function)) { stateset->setDefine("VISIBLE_FUNCTION", visible_function); }
+
 
     float cutOff = 0.001;
     while(arguments.read("--cutOff", cutOff)) {}
