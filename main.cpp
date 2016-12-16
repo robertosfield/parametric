@@ -3,30 +3,15 @@
  * This application is open source is published under GNU GPL license.
 */
 
+#include <osg/ShapeDrawable>
+
+#include <osgGA/StateSetManipulator>
+
 #include <osgDB/ReadFile>
 #include <osgDB/WriteFile>
-#include <osgUtil/Optimizer>
-#include <osg/CoordinateSystemNode>
-
-#include <osg/Switch>
-#include <osg/Types>
-#include <osgText/Text>
 
 #include <osgViewer/Viewer>
 #include <osgViewer/ViewerEventHandlers>
-
-#include <osgGA/TrackballManipulator>
-#include <osgGA/FlightManipulator>
-#include <osgGA/DriveManipulator>
-#include <osgGA/KeySwitchMatrixManipulator>
-#include <osgGA/StateSetManipulator>
-#include <osgGA/AnimationPathManipulator>
-#include <osgGA/TerrainManipulator>
-#include <osgGA/SphericalManipulator>
-
-#include <osgGA/Device>
-
-#include <iostream>
 
 
 osg::ref_ptr<osg::Geometry> createMesh(const osg::Vec3& origin, const osg::Vec3& uAxis, const osg::Vec3& vAxis, unsigned int uCells, unsigned vCells)
@@ -167,6 +152,42 @@ int main(int argc, char** argv)
     viewer.addEventHandler(new osgGA::StateSetManipulator(viewer.getCamera()->getOrCreateStateSet()));
 
 
+    osg::ref_ptr<osg::Group> group = new osg::Group;
+
+    osg::Vec3 center;
+    osg::Vec3 dimensions;
+    while(arguments.read("--sphere", center.x(), center.y(), center.z(), dimensions.x()))
+    {
+        group->addChild(new osg::ShapeDrawable(new osg::Sphere(center, dimensions.x())));
+    }
+
+    while(arguments.read("--box", center.x(), center.y(), center.z(), dimensions.x(), dimensions.y(), dimensions.z()))
+    {
+        group->addChild(new osg::ShapeDrawable(new osg::Box(center, dimensions.x(), dimensions.y(), dimensions.z())));
+    }
+
+    while(arguments.read("--cone", center.x(), center.y(), center.z(), dimensions.x(), dimensions.y()))
+    {
+        group->addChild(new osg::ShapeDrawable(new osg::Cone(center, dimensions.x(), dimensions.y())));
+    }
+
+    while(arguments.read("--capsule", center.x(), center.y(), center.z(), dimensions.x(), dimensions.y()))
+    {
+        group->addChild(new osg::ShapeDrawable(new osg::Capsule(center, dimensions.x(), dimensions.y())));
+    }
+
+    while(arguments.read("--cylinder", center.x(), center.y(), center.z(), dimensions.x(), dimensions.y()))
+    {
+        group->addChild(new osg::ShapeDrawable(new osg::Cylinder(center, dimensions.x(), dimensions.y())));
+    }
+
+    std::string modelFilename;
+    while(arguments.read("--model", modelFilename))
+    {
+        osg::ref_ptr<osg::Node> model = osgDB::readRefNodeFile(modelFilename);
+        if (model) group->addChild(model);
+    }
+
     osg::Vec3 origin(0.0, 0.0, 0.0);
     osg::Vec3 uAxis(1.0,0.0,0.0);
     osg::Vec3 vAxis(0.0,1.0,0.0);
@@ -185,8 +206,9 @@ int main(int argc, char** argv)
     addShaders(arguments, geometry->getOrCreateStateSet());
 
 
+    group->addChild(geometry);
 
-    viewer.setSceneData(geometry.get());
+    viewer.setSceneData(group);
 
     std::string filename;
     if (arguments.read("-o",filename))
