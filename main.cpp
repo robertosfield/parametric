@@ -14,6 +14,8 @@
 #include <osgViewer/Viewer>
 #include <osgViewer/ViewerEventHandlers>
 
+typedef std::vector< osg::ref_ptr<osg::Texture2D> > Textures;
+
 template<typename T>
 struct parameter_ptr
 {
@@ -161,7 +163,7 @@ osg::ref_ptr<osg::Camera> createDepthCamera(parameter_ptr<osg::Texture> depthTex
     return camera;
 }
 
-void addShaders(osg::ArgumentParser& arguments, osg::StateSet* stateset)
+void addShaders(osg::ArgumentParser& arguments, osg::StateSet* stateset, Textures& backFaceDepthTextures, Textures& frontFaceDepthTextures)
 {
     std::string z_function;
     while(arguments.read("--Z_FUNCTION",z_function)) { stateset->setDefine("Z_FUNCTION", z_function); }
@@ -198,6 +200,34 @@ void addShaders(osg::ArgumentParser& arguments, osg::StateSet* stateset)
     }
 
     stateset->setAttribute(program);
+
+    std::stringstream name;
+    int unit=0;
+    for(Textures::iterator itr = frontFaceDepthTextures.begin();
+        itr != frontFaceDepthTextures.end();
+        ++itr)
+    {
+        stateset->setTextureAttribute(unit, itr->get());
+
+        name<<"frontDepthTexture"<<unit;
+        stateset->addUniform(new osg::Uniform(name.str().c_str(), unit));
+
+        name.str("");
+        ++unit;
+    }
+
+    for(Textures::iterator itr = backFaceDepthTextures.begin();
+        itr != backFaceDepthTextures.end();
+        ++itr)
+    {
+        stateset->setTextureAttribute(unit, itr->get());
+
+        name<<"backDepthTexture"<<unit;
+        stateset->addUniform(new osg::Uniform(name.str().c_str(), unit));
+
+        name.str("");
+        ++unit;
+    }
 }
 
 int main(int argc, char** argv)
@@ -268,7 +298,6 @@ int main(int argc, char** argv)
         }
     }
 
-    typedef std::vector< osg::ref_ptr<osg::Texture2D> > Textures;
     Textures frontDepthTextures;
     Textures backDepthTextures;
 
@@ -298,20 +327,6 @@ int main(int argc, char** argv)
         }
     }
 
-    for(Textures::iterator itr = frontDepthTextures.begin();
-        itr != frontDepthTextures.end();
-        ++itr)
-    {
-        OSG_NOTICE<<"Front depth texture"<<itr->get()<<std::endl;
-    }
-
-    for(Textures::iterator itr = backDepthTextures.begin();
-        itr != backDepthTextures.end();
-        ++itr)
-    {
-        OSG_NOTICE<<"Back depth texture"<<itr->get()<<std::endl;
-    }
-
     osg::Vec3 origin(0.0, 0.0, 0.0);
     osg::Vec3 uAxis(1.0,0.0,0.0);
     osg::Vec3 vAxis(0.0,1.0,0.0);
@@ -327,7 +342,7 @@ int main(int argc, char** argv)
     osg::ref_ptr<osg::Geometry> geometry = createMesh(origin, uAxis, vAxis, uCells, vCells);
 
 
-    addShaders(arguments, geometry->getOrCreateStateSet());
+    addShaders(arguments, geometry->getOrCreateStateSet(), backDepthTextures, frontDepthTextures);
 
 
     group->addChild(geometry);
