@@ -5,6 +5,7 @@
 
 #include <osg/ShapeDrawable>
 #include <osg/CullFace>
+#include <osg/Depth>
 
 #include <osgGA/StateSetManipulator>
 
@@ -141,7 +142,7 @@ osg::ref_ptr<osg::Texture2D> createDepthTexture(unsigned int width, unsigned int
     return depthTexture;
 }
 
-osg::ref_ptr<osg::Camera> createDepthCamera(parameter_ptr<osg::Texture> depthTexture)
+osg::ref_ptr<osg::Camera> createDepthCamera(parameter_ptr<osg::Texture> depthTexture, bool backFace)
 {
     osg::ref_ptr<osg::Camera> camera = new osg::Camera;
     camera->attach(osg::Camera::DEPTH_BUFFER, depthTexture.get());
@@ -160,10 +161,23 @@ osg::ref_ptr<osg::Camera> createDepthCamera(parameter_ptr<osg::Texture> depthTex
     camera->setProjectionMatrix(osg::Matrixd::identity());
     camera->setViewMatrix(osg::Matrixd::identity());
 
+    camera->setComputeNearFarMode(osg::CullSettings::DO_NOT_COMPUTE_NEAR_FAR);
+
+    if (backFace)
+    {
+        camera->getOrCreateStateSet()->setAttribute(new osg::Depth(osg::Depth::GREATER));
+        camera->setClearDepth(0.0);
+    }
+    else
+    {
+//        camera->getOrCreateStateSet()->setAttribute(new osg::Depth(osg::Depth::LESS));
+//        camera->setClearDepth(1.0);
+    }
+
     return camera;
 }
 
-void addShaders(osg::ArgumentParser& arguments, osg::StateSet* stateset, Textures& backFaceDepthTextures, Textures& frontFaceDepthTextures)
+void addShaders(osg::ArgumentParser& arguments, osg::StateSet* stateset, Textures& backFaceDepthTextures, Textures& frontFaceDepthTextures, unsigned int width, unsigned int height)
 {
     std::string z_function;
     while(arguments.read("--Z_FUNCTION",z_function)) { stateset->setDefine("Z_FUNCTION", z_function); }
@@ -203,31 +217,32 @@ void addShaders(osg::ArgumentParser& arguments, osg::StateSet* stateset, Texture
 
     std::stringstream name;
     int unit=0;
-    for(Textures::iterator itr = frontFaceDepthTextures.begin();
-        itr != frontFaceDepthTextures.end();
-        ++itr)
+    unsigned int numDepthTextures = std::min(backFaceDepthTextures.size(), frontFaceDepthTextures.size());
+    for(unsigned int i=0; i<numDepthTextures; ++i)
     {
-        stateset->setTextureAttribute(unit, itr->get());
+        name<<"frontDepthTexture"<<i;
+        stateset->setTextureAttribute(unit, frontFaceDepthTextures[i].get());
+        stateset->addUniform(new osg::Uniform(name.str().c_str(), unit));
 
-        name<<"frontDepthTexture"<<unit;
+        name.str("");
+        ++unit;
+
+        name<<"backDepthTexture"<<i;
+        stateset->setTextureAttribute(unit, backFaceDepthTextures[i].get());
         stateset->addUniform(new osg::Uniform(name.str().c_str(), unit));
 
         name.str("");
         ++unit;
     }
 
-    for(Textures::iterator itr = backFaceDepthTextures.begin();
-        itr != backFaceDepthTextures.end();
-        ++itr)
-    {
-        stateset->setTextureAttribute(unit, itr->get());
 
-        name<<"backDepthTexture"<<unit;
-        stateset->addUniform(new osg::Uniform(name.str().c_str(), unit));
+    name.str("");
+    name<<numDepthTextures;
+    stateset->setDefine("NUM_DEPTH_TEXTURES", name.str());
 
-        name.str("");
-        ++unit;
-    }
+    stateset->addUniform(new osg::Uniform("viewportDimensions",osg::Vec4(0.0f,0.0f,static_cast<float>(width),static_cast<float>(height))));
+
+
 }
 
 int main(int argc, char** argv)
@@ -240,8 +255,21 @@ int main(int argc, char** argv)
     viewer.addEventHandler(new osgViewer::StatsHandler());
     viewer.addEventHandler(new osgGA::StateSetManipulator(viewer.getCamera()->getOrCreateStateSet()));
 
-    unsigned int width=1280;
-    unsigned int height=1024;
+    viewer.realize();
+
+    osgViewer::ViewerBase::Windows windows;
+    viewer.getWindows(windows);
+    if (windows.empty())
+    {
+        OSG_NOTICE<<"Warning: no windows created"<<std::endl;
+        return 0;
+    }
+
+    const osg::GraphicsContext::Traits* traits = windows.front()->getTraits();
+    unsigned int width = traits->width;
+    unsigned int height = traits->height;
+
+    viewer.getCamera()->setComputeNearFarMode(osg::CullSettings::DO_NOT_COMPUTE_NEAR_FAR);
 
     osg::ref_ptr<osg::Group> group = new osg::Group;
 
@@ -311,7 +339,7 @@ int main(int argc, char** argv)
 
             // set up the depth texture for front face of the boundary
             osg::ref_ptr<osg::Texture2D> frontDepthTexture = createDepthTexture(width, height);
-            osg::ref_ptr<osg::Camera> frontDepthCamera = createDepthCamera(frontDepthTexture);
+            osg::ref_ptr<osg::Camera> frontDepthCamera = createDepthCamera(frontDepthTexture, false);
             frontDepthCamera->getOrCreateStateSet()->setAttributeAndModes(new osg::CullFace(osg::CullFace::BACK), osg::StateAttribute::ON);
             frontDepthCamera->addChild(boundarySubgraph);
             group->addChild(frontDepthCamera);
@@ -319,7 +347,7 @@ int main(int argc, char** argv)
 
             // set up the depth texture for back face of the boundary
             osg::ref_ptr<osg::Texture2D> backDepthTexture = createDepthTexture(width, height);
-            osg::ref_ptr<osg::Camera> backDepthCamera = createDepthCamera(backDepthTexture);
+            osg::ref_ptr<osg::Camera> backDepthCamera = createDepthCamera(backDepthTexture, true);
             backDepthCamera->getOrCreateStateSet()->setAttributeAndModes(new osg::CullFace(osg::CullFace::FRONT), osg::StateAttribute::ON);
             backDepthCamera->addChild(boundarySubgraph);
             group->addChild(backDepthCamera);
@@ -342,7 +370,7 @@ int main(int argc, char** argv)
     osg::ref_ptr<osg::Geometry> geometry = createMesh(origin, uAxis, vAxis, uCells, vCells);
 
 
-    addShaders(arguments, geometry->getOrCreateStateSet(), backDepthTextures, frontDepthTextures);
+    addShaders(arguments, geometry->getOrCreateStateSet(), backDepthTextures, frontDepthTextures, width, height);
 
 
     group->addChild(geometry);
