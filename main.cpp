@@ -40,13 +40,12 @@ struct parameter_ptr
 };
 
 
-osg::ref_ptr<osg::Geometry> createMesh(const osg::Vec3& origin, const osg::Vec3& uAxis, const osg::Vec3& vAxis, unsigned int uCells, unsigned vCells)
+osg::ref_ptr<osg::Geometry> createMesh(const osg::Vec3& origin, const osg::Vec3& uAxis, const osg::Vec3& vAxis, unsigned int uCells, unsigned vCells, bool top)
 {
     osg::ref_ptr<osg::Geometry> geometry = new osg::Geometry;
     geometry->setUseVertexBufferObjects(true);
 
     unsigned int numVertices = (uCells+1)*(vCells+1);
-
 
     // set up vertices
     osg::ref_ptr<osg::Vec3Array> vertices = new osg::Vec3Array;
@@ -102,12 +101,24 @@ osg::ref_ptr<osg::Geometry> createMesh(const osg::Vec3& origin, const osg::Vec3&
             unsigned int p1 = p0+(uCells+1);
             unsigned int p2 = p0+1;
             unsigned int p3 = p1+1;
-            primitives->addElement(p0);
-            primitives->addElement(p2);
-            primitives->addElement(p1);
-            primitives->addElement(p2);
-            primitives->addElement(p3);
-            primitives->addElement(p1);
+            if (top)
+            {
+                primitives->addElement(p0);
+                primitives->addElement(p2);
+                primitives->addElement(p1);
+                primitives->addElement(p2);
+                primitives->addElement(p3);
+                primitives->addElement(p1);
+            }
+            else
+            {
+                primitives->addElement(p0);
+                primitives->addElement(p1);
+                primitives->addElement(p2);
+                primitives->addElement(p2);
+                primitives->addElement(p1);
+                primitives->addElement(p3);
+            }
         }
     }
 
@@ -473,14 +484,14 @@ int main(int argc, char** argv)
     // base
     if (renderBase)
     {
-        osg::ref_ptr<osg::Geometry> geometry = createMesh(baseOrigin, uAxis, vAxis, uCells, vCells);
+        osg::ref_ptr<osg::Geometry> geometry = createMesh(baseOrigin, uAxis, vAxis, uCells, vCells, false);
         parametric_group->addChild(geometry.get());
     }
 
     // top
     if (renderTop)
     {
-        osg::ref_ptr<osg::Geometry> geometry = createMesh(topOrigin, uAxis, vAxis, uCells, vCells);
+        osg::ref_ptr<osg::Geometry> geometry = createMesh(topOrigin, uAxis, vAxis, uCells, vCells, true);
         parametric_group->addChild(geometry.get());
     }
 
