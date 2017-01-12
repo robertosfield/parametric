@@ -1,13 +1,8 @@
-#pragma import_defines(Z_FUNCTION, VISIBLE_FUNCTION, NUM_DEPTH_TEXTURES)
-
-#ifndef Z_FUNCTION
-    #define Z_FUNCTION(x, y, z) (x-x*x)*(y-y*y)*5.0
-#endif
+#pragma import_defines(NUM_DEPTH_TEXTURES)
 
 #ifndef NUM_DEPTH_TEXTURES
     #define NUM_DEPTH_TEXTURES 0
 #endif
-
 
 uniform float cutOff;
 
