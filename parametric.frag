@@ -1,11 +1,7 @@
 #pragma import_defines(Z_FUNCTION, VISIBLE_FUNCTION, NUM_DEPTH_TEXTURES)
 
 #ifndef Z_FUNCTION
-    #define Z_FUNCTION(x, y) (x-x*x)*(y-y*y)*5.0
-#endif
-
-#ifndef VISIBLE_FUNCTION
-    #define VISIBLE_FUNCTION(x, y) (Z_FUNCTION(x,y)>cutOff)
+    #define Z_FUNCTION(x, y, z) (x-x*x)*(y-y*y)*5.0
 #endif
 
 #ifndef NUM_DEPTH_TEXTURES
@@ -51,10 +47,6 @@ bool outside(vec2 texcoord, float depth, sampler2D backDepthTexture, sampler2D f
 
 void main(void)
 {
-#ifdef VISIBLE_FUNCTION
-    if (!VISIBLE_FUNCTION(v.x, v.y)) discard;
-#endif
-
 #if NUM_DEPTH_TEXTURES>=1
 
     float depth = gl_FragCoord.z;

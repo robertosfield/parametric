@@ -64,13 +64,14 @@ osg::ref_ptr<osg::Geometry> createMesh(const osg::Vec3& origin, const osg::Vec3&
     }
     geometry->setVertexArray(vertices);
 
-
     // set up normal
-    osg::Vec3 normal(uAxis ^ vAxis);
-    normal.normalize();
+    osg::Vec3 verticalAxis(uAxis ^ vAxis);
+    verticalAxis.normalize();
+
+    geometry->getOrCreateStateSet()->addUniform(new osg::Uniform("verticalAxis", verticalAxis));
 
     osg::ref_ptr<osg::Vec3Array> normals = new osg::Vec3Array();
-    normals->push_back(normal);
+    normals->push_back(osg::Vec3(0.0f,0.0f,0.0f));
     geometry->setNormalArray(normals, osg::Array::BIND_OVERALL);
 
 
@@ -110,7 +111,7 @@ osg::ref_ptr<osg::Geometry> createMesh(const osg::Vec3& origin, const osg::Vec3&
         }
     }
 
-    osg::Vec3 wAxis = normal*((uAxis.length()+vAxis.length())*0.5);
+    osg::Vec3 wAxis = verticalAxis*((uAxis.length()+vAxis.length())*0.5);
 
     osg::BoundingBox bb;
     bb.expandBy(origin);
@@ -128,6 +129,94 @@ osg::ref_ptr<osg::Geometry> createMesh(const osg::Vec3& origin, const osg::Vec3&
     return geometry;
 }
 
+osg::ref_ptr<osg::Geometry> createSideWalls(const osg::Vec3& baseOrigin, const osg::Vec3& topOrigin, const osg::Vec3& uAxis, const osg::Vec3& vAxis, unsigned int uCells, unsigned vCells)
+{
+    osg::ref_ptr<osg::Geometry> geometry = new osg::Geometry;
+    geometry->setUseVertexBufferObjects(true);
+
+    unsigned int numVertices = 2*(uCells+1) + 2*(vCells+1);
+
+
+    // set up vertices
+    osg::ref_ptr<osg::Vec3Array> vertices = new osg::Vec3Array;
+    vertices->reserve(numVertices);
+
+    osg::Vec3 ua = uAxis; ua /= static_cast<float>(uCells);
+    osg::Vec3 va = vAxis; va /= static_cast<float>(vCells);
+
+    int c=0;
+    int r=0;
+    for(r=0; r<=vCells; ++r)
+    {
+        vertices->push_back(baseOrigin + ua*static_cast<float>(c) + va*static_cast<float>(r));
+        vertices->push_back(topOrigin + ua*static_cast<float>(c) + va*static_cast<float>(r));
+    }
+
+    r = vCells;
+    for(c=1; c<=uCells; ++c)
+    {
+        vertices->push_back(baseOrigin + ua*static_cast<float>(c) + va*static_cast<float>(r));
+        vertices->push_back(topOrigin + ua*static_cast<float>(c) + va*static_cast<float>(r));
+    }
+
+    c = uCells;
+    for(r=vCells; r>=0; --r)
+    {
+        vertices->push_back(baseOrigin + ua*static_cast<float>(c) + va*static_cast<float>(r));
+        vertices->push_back(topOrigin + ua*static_cast<float>(c) + va*static_cast<float>(r));
+    }
+
+    r = 0;
+    for(c=uCells; c>=0; --c)
+    {
+        vertices->push_back(baseOrigin + ua*static_cast<float>(c) + va*static_cast<float>(r));
+        vertices->push_back(topOrigin + ua*static_cast<float>(c) + va*static_cast<float>(r));
+    }
+
+    geometry->setVertexArray(vertices);
+
+    // set up normal
+    osg::Vec3 verticalAxis(uAxis ^ vAxis);
+    verticalAxis.normalize();
+
+    geometry->getOrCreateStateSet()->addUniform(new osg::Uniform("verticalAxis", verticalAxis));
+
+    osg::ref_ptr<osg::Vec3Array> normals = new osg::Vec3Array();
+    normals->push_back(osg::Vec3(0.0f,0.0f,0.0f));
+    geometry->setNormalArray(normals, osg::Array::BIND_OVERALL);
+
+
+    // set up colour
+    osg::Vec4 color(1.0,1.0,1.0,1.0);
+    osg::ref_ptr<osg::Vec4Array> colours = new osg::Vec4Array;
+    colours->push_back(color);
+    geometry->setColorArray(colours, osg::Array::BIND_OVERALL);
+
+
+    // set up mesh
+
+    OSG_NOTICE<<"numVertices = "<<numVertices<<std::endl;
+    OSG_NOTICE<<"numVertices>>16 = "<<(numVertices>>16)<<std::endl;
+
+    geometry->addPrimitiveSet(new osg::DrawArrays(GL_TRIANGLE_STRIP, 0, vertices->size()));
+
+    osg::Vec3 wAxis = verticalAxis*((uAxis.length()+vAxis.length())*0.5);
+
+    osg::BoundingBox bb;
+    bb.expandBy(baseOrigin);
+    bb.expandBy(baseOrigin+uAxis);
+    bb.expandBy(baseOrigin+vAxis);
+    bb.expandBy(baseOrigin+uAxis+vAxis);
+
+    bb.expandBy(baseOrigin+wAxis);
+    bb.expandBy(baseOrigin+uAxis+wAxis);
+    bb.expandBy(baseOrigin+vAxis+wAxis);
+    bb.expandBy(baseOrigin+uAxis+vAxis+wAxis);
+
+    geometry->setInitialBound(bb);
+
+    return geometry;
+}
 
 osg::ref_ptr<osg::Texture2D> createDepthTexture(unsigned int width, unsigned int height)
 {
@@ -366,14 +455,46 @@ int main(int argc, char** argv)
     while (arguments.read("--columns", uCells)) {}
     while (arguments.read("--rows", vCells)) {}
 
+    osg::ref_ptr<osg::Group> parametric_group = new osg::Group;
 
-    osg::ref_ptr<osg::Geometry> geometry = createMesh(origin, uAxis, vAxis, uCells, vCells);
+    osg::Vec3 baseOrigin = origin;
+    osg::Vec3 topOrigin = baseOrigin+osg::Vec3(0.0,0.0,1.0);
+
+    bool renderBase = false;
+    bool renderTop = true;
+    bool renderSidewalls = false;
+
+    while (arguments.read("--base")) renderBase=true;
+    while (arguments.read("--top")) renderTop=true;
+    while (arguments.read("--walls")) renderSidewalls=true;
+    while (arguments.read("--all")) { renderBase = true; renderTop = true; renderSidewalls = true; }
 
 
-    addShaders(arguments, geometry->getOrCreateStateSet(), backDepthTextures, frontDepthTextures, width, height);
+    // base
+    if (renderBase)
+    {
+        osg::ref_ptr<osg::Geometry> geometry = createMesh(baseOrigin, uAxis, vAxis, uCells, vCells);
+        parametric_group->addChild(geometry.get());
+    }
+
+    // top
+    if (renderTop)
+    {
+        osg::ref_ptr<osg::Geometry> geometry = createMesh(topOrigin, uAxis, vAxis, uCells, vCells);
+        parametric_group->addChild(geometry.get());
+    }
+
+    // sidewalls
+    if (renderSidewalls)
+    {
+        osg::ref_ptr<osg::Geometry> geometry = createSideWalls(baseOrigin, topOrigin, uAxis, vAxis, uCells, vCells);
+        parametric_group->addChild(geometry.get());
+    }
+
+    addShaders(arguments, parametric_group->getOrCreateStateSet(), backDepthTextures, frontDepthTextures, width, height);
 
 
-    group->addChild(geometry);
+    group->addChild(parametric_group);
 
     viewer.setSceneData(group);
 
