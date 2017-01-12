@@ -152,9 +152,15 @@ osg::ref_ptr<osg::Geometry> createSideWalls(const osg::Vec3& baseOrigin, const o
     osg::ref_ptr<osg::Vec3Array> vertices = new osg::Vec3Array;
     vertices->reserve(numVertices);
 
+    // normals
+    osg::ref_ptr<osg::Vec3Array> normals = new osg::Vec3Array();
+    geometry->setNormalArray(normals, osg::Array::BIND_PER_PRIMITIVE_SET);
+
+
     osg::Vec3 ua = uAxis; ua /= static_cast<float>(uCells);
     osg::Vec3 va = vAxis; va /= static_cast<float>(vCells);
 
+    int vn = vertices->size();
     int c=0;
     int r=0;
     for(r=0; r<=vCells; ++r)
@@ -162,27 +168,38 @@ osg::ref_ptr<osg::Geometry> createSideWalls(const osg::Vec3& baseOrigin, const o
         vertices->push_back(baseOrigin + ua*static_cast<float>(c) + va*static_cast<float>(r));
         vertices->push_back(topOrigin + ua*static_cast<float>(c) + va*static_cast<float>(r));
     }
+    normals->push_back(osg::Vec3(-1.0f,0.0f,0.0f));
+    geometry->addPrimitiveSet(new osg::DrawArrays(GL_TRIANGLE_STRIP, vn, vertices->size()-vn));
 
+    vn = vertices->size();
     r = vCells;
-    for(c=1; c<=uCells; ++c)
+    for(c=0; c<=uCells; ++c)
     {
         vertices->push_back(baseOrigin + ua*static_cast<float>(c) + va*static_cast<float>(r));
         vertices->push_back(topOrigin + ua*static_cast<float>(c) + va*static_cast<float>(r));
     }
+    normals->push_back(osg::Vec3(0.0f,1.0f,0.0f));
+    geometry->addPrimitiveSet(new osg::DrawArrays(GL_TRIANGLE_STRIP, vn, vertices->size()-vn));
 
+    vn = vertices->size();
     c = uCells;
     for(r=vCells; r>=0; --r)
     {
         vertices->push_back(baseOrigin + ua*static_cast<float>(c) + va*static_cast<float>(r));
         vertices->push_back(topOrigin + ua*static_cast<float>(c) + va*static_cast<float>(r));
     }
+    normals->push_back(osg::Vec3(1.0f,0.0f,0.0f));
+    geometry->addPrimitiveSet(new osg::DrawArrays(GL_TRIANGLE_STRIP, vn, vertices->size()-vn));
 
+    vn = vertices->size();
     r = 0;
     for(c=uCells; c>=0; --c)
     {
         vertices->push_back(baseOrigin + ua*static_cast<float>(c) + va*static_cast<float>(r));
         vertices->push_back(topOrigin + ua*static_cast<float>(c) + va*static_cast<float>(r));
     }
+    normals->push_back(osg::Vec3(0.0f,-1.0f,0.0f));
+    geometry->addPrimitiveSet(new osg::DrawArrays(GL_TRIANGLE_STRIP, vn, vertices->size()-vn));
 
     geometry->setVertexArray(vertices);
 
@@ -191,11 +208,6 @@ osg::ref_ptr<osg::Geometry> createSideWalls(const osg::Vec3& baseOrigin, const o
     verticalAxis.normalize();
 
     geometry->getOrCreateStateSet()->addUniform(new osg::Uniform("verticalAxis", verticalAxis));
-
-    osg::ref_ptr<osg::Vec3Array> normals = new osg::Vec3Array();
-    normals->push_back(osg::Vec3(0.0f,0.0f,0.0f));
-    geometry->setNormalArray(normals, osg::Array::BIND_OVERALL);
-
 
     // set up colour
     osg::Vec4 color(1.0,1.0,1.0,1.0);
@@ -209,8 +221,6 @@ osg::ref_ptr<osg::Geometry> createSideWalls(const osg::Vec3& baseOrigin, const o
     OSG_NOTICE<<"numVertices = "<<numVertices<<std::endl;
     OSG_NOTICE<<"numVertices>>16 = "<<(numVertices>>16)<<std::endl;
 
-    geometry->addPrimitiveSet(new osg::DrawArrays(GL_TRIANGLE_STRIP, 0, vertices->size()));
-
     osg::Vec3 wAxis = verticalAxis*((uAxis.length()+vAxis.length())*0.5);
 
     osg::BoundingBox bb;
@@ -223,6 +233,11 @@ osg::ref_ptr<osg::Geometry> createSideWalls(const osg::Vec3& baseOrigin, const o
     bb.expandBy(baseOrigin+uAxis+wAxis);
     bb.expandBy(baseOrigin+vAxis+wAxis);
     bb.expandBy(baseOrigin+uAxis+vAxis+wAxis);
+
+    bb.expandBy(baseOrigin-wAxis);
+    bb.expandBy(baseOrigin+uAxis-wAxis);
+    bb.expandBy(baseOrigin+vAxis-wAxis);
+    bb.expandBy(baseOrigin+uAxis+vAxis-wAxis);
 
     geometry->setInitialBound(bb);
 

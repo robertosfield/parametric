@@ -46,7 +46,7 @@ void main(void)
     v = computePosition( gl_Vertex.x, gl_Vertex.y, gl_Vertex.z);
 
     vec3 n = gl_Normal;
-    //if (n.x==0.0 && n.y==0 && n.z==0.0)
+    if (n.x==0.0 && n.y==0 && n.z==0.0)
     {
         n = computeNormal( gl_Vertex.x, gl_Vertex.y, gl_Vertex.z );
     }
