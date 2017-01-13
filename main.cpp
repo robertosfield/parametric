@@ -297,15 +297,6 @@ void addShaders(osg::ArgumentParser& arguments, osg::StateSet* stateset, Texture
     std::string z_function;
     while(arguments.read("--Z_FUNCTION",z_function)) { stateset->setDefine("Z_FUNCTION", z_function); }
 
-
-    std::string visible_function;
-    while(arguments.read("--VISIBLE_FUNCTION",visible_function)) { stateset->setDefine("VISIBLE_FUNCTION", visible_function); }
-
-
-    float cutOff = 0.001;
-    while(arguments.read("--cutOff", cutOff)) {}
-    stateset->addUniform(new osg::Uniform("cutOff",cutOff));
-
     osg::ref_ptr<osg::Program> program = new osg::Program;
 
     std::string filename;

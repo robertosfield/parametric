@@ -1,9 +1,5 @@
 #pragma import_defines(Z_FUNCTION)
 
-#ifndef Z_FUNCTION
-    #define Z_FUNCTION(x, y, z) ((z==0.0?-1.0 : 1.0)*((x-x*x)*(y-y*y)*5.0))
-#endif
-
 uniform vec3 verticalAxis;
 
 varying vec4 color;
@@ -41,15 +37,18 @@ vec3 computeNormal(float x, float y, float z)
 
 void main(void)
 {
+    vec3 n = gl_Normal;
 
 #ifdef Z_FUNCTION
     v = computePosition( gl_Vertex.x, gl_Vertex.y, gl_Vertex.z);
 
-    vec3 n = gl_Normal;
     if (n.x==0.0 && n.y==0 && n.z==0.0)
     {
         n = computeNormal( gl_Vertex.x, gl_Vertex.y, gl_Vertex.z );
     }
+#else
+    v = gl_Vertex;
+#endif
 
     n = gl_NormalMatrix * n;
 
@@ -81,11 +80,6 @@ void main(void)
 #endif
 
     color.a = 1.0;
-
-#else
-    v = gl_Vertex;
-    color = vec4(1.0,1.0,1.0,1.0);
-#endif
 
     gl_Position = gl_ModelViewProjectionMatrix * v;
 };
