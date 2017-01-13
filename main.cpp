@@ -15,29 +15,12 @@
 #include <osgViewer/Viewer>
 #include <osgViewer/ViewerEventHandlers>
 
+#include "ParametricScene.h"
+
+
+using namespace osgParametric;
+
 typedef std::vector< osg::ref_ptr<osg::Texture2D> > Textures;
-
-template<typename T>
-struct parameter_ptr
-{
-    typedef T element_type;
-    element_type* _ptr;
-
-    parameter_ptr():_ptr(0) {}
-
-    parameter_ptr(element_type* ptr):_ptr(ptr) {}
-
-    template<typename P>
-    parameter_ptr(osg::ref_ptr<P>& rptr):_ptr(rptr.get()) {}
-
-    T& operator*() const { return *_ptr; }
-    T* operator->() const { return _ptr; }
-    T* get() const { return _ptr; }
-
-    bool operator!() const   { return _ptr==0; } // not required
-    bool valid() const       { return _ptr!=0; }
-
-};
 
 
 osg::ref_ptr<osg::Geometry> createMesh(const osg::Vec3& origin, const osg::Vec3& uAxis, const osg::Vec3& vAxis, unsigned int uCells, unsigned vCells, bool top)

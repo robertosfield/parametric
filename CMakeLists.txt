@@ -11,7 +11,12 @@ FIND_PACKAGE(osgUtil)
 FIND_PACKAGE(osgGA)
 FIND_PACKAGE(osgViewer)
 
+SET(HEADERS
+    ParametricScene.hpp
+)
+
 SET(SOURCES
+    ParametricScene.cpp
     main.cpp
 )
 
