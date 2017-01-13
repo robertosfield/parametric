@@ -294,8 +294,6 @@ osg::ref_ptr<osg::Camera> createDepthCamera(parameter_ptr<osg::Texture> depthTex
 
 void addShaders(osg::ArgumentParser& arguments, osg::StateSet* stateset, Textures& backFaceDepthTextures, Textures& frontFaceDepthTextures, unsigned int width, unsigned int height)
 {
-    std::string z_function;
-    while(arguments.read("--Z_FUNCTION",z_function)) { stateset->setDefine("Z_FUNCTION", z_function); }
 
     osg::ref_ptr<osg::Program> program = new osg::Program;
 
@@ -349,6 +347,59 @@ void addShaders(osg::ArgumentParser& arguments, osg::StateSet* stateset, Texture
     stateset->addUniform(new osg::Uniform("viewportDimensions",osg::Vec4(0.0f,0.0f,static_cast<float>(width),static_cast<float>(height))));
 
 
+}
+
+osg::ref_ptr<osg::Group> createParametric(osg::ArgumentParser& arguments)
+{
+    osg::ref_ptr<osg::Group> parametric_group = new osg::Group;
+
+    osg::Vec3 origin(0.0, 0.0, 0.0);
+    osg::Vec3 uAxis(1.0,0.0,0.0);
+    osg::Vec3 vAxis(0.0,1.0,0.0);
+
+    unsigned int uCells = 10;
+    unsigned int vCells = 10;
+
+    while (arguments.read("--columns", uCells)) {}
+    while (arguments.read("--rows", vCells)) {}
+
+    osg::Vec3 baseOrigin = origin;
+    osg::Vec3 topOrigin = baseOrigin+osg::Vec3(0.0,0.0,1.0);
+
+    bool renderBase = false;
+    bool renderTop = true;
+    bool renderSidewalls = false;
+
+    while (arguments.read("--base")) renderBase=true;
+    while (arguments.read("--top")) renderTop=true;
+    while (arguments.read("--walls")) renderSidewalls=true;
+    while (arguments.read("--all")) { renderBase = true; renderTop = true; renderSidewalls = true; }
+
+    std::string z_function;
+    while(arguments.read("--Z_FUNCTION",z_function)) { parametric_group->getOrCreateStateSet()->setDefine("Z_FUNCTION", z_function); }
+
+    // base
+    if (renderBase)
+    {
+        osg::ref_ptr<osg::Geometry> geometry = createMesh(baseOrigin, uAxis, vAxis, uCells, vCells, false);
+        parametric_group->addChild(geometry.get());
+    }
+
+    // top
+    if (renderTop)
+    {
+        osg::ref_ptr<osg::Geometry> geometry = createMesh(topOrigin, uAxis, vAxis, uCells, vCells, true);
+        parametric_group->addChild(geometry.get());
+    }
+
+    // sidewalls
+    if (renderSidewalls)
+    {
+        osg::ref_ptr<osg::Geometry> geometry = createSideWalls(baseOrigin, topOrigin, uAxis, vAxis, uCells, vCells);
+        parametric_group->addChild(geometry.get());
+    }
+
+    return parametric_group;
 }
 
 int main(int argc, char** argv)
@@ -461,52 +512,7 @@ int main(int argc, char** argv)
         }
     }
 
-    osg::Vec3 origin(0.0, 0.0, 0.0);
-    osg::Vec3 uAxis(1.0,0.0,0.0);
-    osg::Vec3 vAxis(0.0,1.0,0.0);
-
-    unsigned int uCells = 10;
-    unsigned int vCells = 10;
-
-
-    while (arguments.read("--columns", uCells)) {}
-    while (arguments.read("--rows", vCells)) {}
-
-    osg::ref_ptr<osg::Group> parametric_group = new osg::Group;
-
-    osg::Vec3 baseOrigin = origin;
-    osg::Vec3 topOrigin = baseOrigin+osg::Vec3(0.0,0.0,1.0);
-
-    bool renderBase = false;
-    bool renderTop = true;
-    bool renderSidewalls = false;
-
-    while (arguments.read("--base")) renderBase=true;
-    while (arguments.read("--top")) renderTop=true;
-    while (arguments.read("--walls")) renderSidewalls=true;
-    while (arguments.read("--all")) { renderBase = true; renderTop = true; renderSidewalls = true; }
-
-
-    // base
-    if (renderBase)
-    {
-        osg::ref_ptr<osg::Geometry> geometry = createMesh(baseOrigin, uAxis, vAxis, uCells, vCells, false);
-        parametric_group->addChild(geometry.get());
-    }
-
-    // top
-    if (renderTop)
-    {
-        osg::ref_ptr<osg::Geometry> geometry = createMesh(topOrigin, uAxis, vAxis, uCells, vCells, true);
-        parametric_group->addChild(geometry.get());
-    }
-
-    // sidewalls
-    if (renderSidewalls)
-    {
-        osg::ref_ptr<osg::Geometry> geometry = createSideWalls(baseOrigin, topOrigin, uAxis, vAxis, uCells, vCells);
-        parametric_group->addChild(geometry.get());
-    }
+    osg::ref_ptr<osg::Group> parametric_group = createParametric(arguments);
 
     addShaders(arguments, parametric_group->getOrCreateStateSet(), backDepthTextures, frontDepthTextures, width, height);
 
