@@ -292,9 +292,8 @@ osg::ref_ptr<osg::Camera> createDepthCamera(parameter_ptr<osg::Texture> depthTex
     return camera;
 }
 
-void addShaders(osg::ArgumentParser& arguments, osg::StateSet* stateset, Textures& backFaceDepthTextures, Textures& frontFaceDepthTextures, unsigned int width, unsigned int height)
+osg::ref_ptr<osg::Program> createProgram(osg::ArgumentParser& arguments)
 {
-
     osg::ref_ptr<osg::Program> program = new osg::Program;
 
     std::string filename;
@@ -317,8 +316,11 @@ void addShaders(osg::ArgumentParser& arguments, osg::StateSet* stateset, Texture
         program->addShader(itr->second);
     }
 
-    stateset->setAttribute(program);
+    return program;
+}
 
+void setUpDepthStateSet(osg::StateSet* stateset, Textures& backFaceDepthTextures, Textures& frontFaceDepthTextures, unsigned int width, unsigned int height)
+{
     std::stringstream name;
     int unit=0;
     unsigned int numDepthTextures = std::min(backFaceDepthTextures.size(), frontFaceDepthTextures.size());
@@ -339,14 +341,11 @@ void addShaders(osg::ArgumentParser& arguments, osg::StateSet* stateset, Texture
         ++unit;
     }
 
-
     name.str("");
     name<<numDepthTextures;
     stateset->setDefine("NUM_DEPTH_TEXTURES", name.str());
 
     stateset->addUniform(new osg::Uniform("viewportDimensions",osg::Vec4(0.0f,0.0f,static_cast<float>(width),static_cast<float>(height))));
-
-
 }
 
 osg::ref_ptr<osg::Group> createParametric(osg::ArgumentParser& arguments)
@@ -514,8 +513,9 @@ int main(int argc, char** argv)
 
     osg::ref_ptr<osg::Group> parametric_group = createParametric(arguments);
 
-    addShaders(arguments, parametric_group->getOrCreateStateSet(), backDepthTextures, frontDepthTextures, width, height);
+    parametric_group->getOrCreateStateSet()->setAttribute(createProgram(arguments));
 
+    setUpDepthStateSet(parametric_group->getOrCreateStateSet(), backDepthTextures, frontDepthTextures, width, height);
 
     group->addChild(parametric_group);
 
