@@ -17,7 +17,7 @@ using namespace osgParametric;
 //
 void RTTCameraCullCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
 {
-    osgUtil::CullVisitor* cv = nv->asCullVisitor();
+    osgUtil::CullVisitor* cv = dynamic_cast<osgUtil::CullVisitor*>(nv);
 
     osg::UserDataContainer* udc = cv->getOrCreateUserDataContainer();
     unsigned int i = udc->getUserObjectIndex("ProjectionMatrix");
@@ -32,7 +32,7 @@ void RTTCameraCullCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
 
 void NearFarCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
 {
-    osgUtil::CullVisitor* cv = nv->asCullVisitor();
+    osgUtil::CullVisitor* cv = dynamic_cast<osgUtil::CullVisitor*>(nv);
 
     osg::ref_ptr<osg::RefMatrix> pm = cv->getProjectionMatrix();
     pm->setName("ProjectionMatrix");
