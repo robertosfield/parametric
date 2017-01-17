@@ -240,6 +240,68 @@ osg::ref_ptr<osg::Texture2D> createDepthTexture(unsigned int width, unsigned int
     return depthTexture;
 }
 
+class RTTCameraCullCallback : public osg::NodeCallback
+{
+    public:
+
+        RTTCameraCullCallback() {}
+
+        virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
+        {
+            osgUtil::CullVisitor* cv = nv->asCullVisitor();
+
+            //osg::RefMatrix cv->getOrCreateUserDataContainer()->getUserObject("projectionMatrix");
+
+            osg::UserDataContainer* udc = cv->getOrCreateUserDataContainer();
+            unsigned int i = udc->getUserObjectIndex("ProjectionMatrix");
+            osg::RefMatrix* pm = (i<udc->getNumUserObjects()) ? dynamic_cast<osg::RefMatrix*>(udc->getUserObject(i)) : 0;
+
+            OSG_NOTICE<<"RTTCameraCullCallback pm="<<pm<<std::endl;
+
+            if (pm) cv->pushProjectionMatrix( pm );
+
+            traverse(node, nv);
+
+            if (pm) cv->popProjectionMatrix();
+        }
+
+    protected:
+
+        virtual ~RTTCameraCullCallback() {}
+};
+
+class NearFarCallback : public osg::NodeCallback
+{
+    public:
+
+        osg::BoundingBox _bb;
+
+        NearFarCallback(const osg::BoundingBox& bb) : _bb(bb) {}
+
+        virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
+        {
+            osgUtil::CullVisitor* cv = nv->asCullVisitor();
+
+            osg::ref_ptr<osg::RefMatrix> pm = cv->getProjectionMatrix();
+            pm->setName("ProjectionMatrix");
+
+            osg::UserDataContainer* udc = cv->getOrCreateUserDataContainer();
+            udc->addUserObject(pm.get());
+
+            traverse(node, nv);
+
+            cv->updateCalculatedNearFar(*(cv->getModelViewMatrix()), _bb);
+
+            // remove the matrix
+            unsigned int i = udc->getUserObjectIndex(pm.get());
+            udc->removeUserObject(i);
+        }
+
+    protected:
+
+        virtual ~NearFarCallback() {}
+};
+
 osg::ref_ptr<osg::Camera> createDepthCamera(parameter_ptr<osg::Texture> depthTexture, bool backFace)
 {
     osg::ref_ptr<osg::Camera> camera = new osg::Camera;
@@ -260,6 +322,8 @@ osg::ref_ptr<osg::Camera> createDepthCamera(parameter_ptr<osg::Texture> depthTex
     camera->setViewMatrix(osg::Matrixd::identity());
 
     camera->setComputeNearFarMode(osg::CullSettings::DO_NOT_COMPUTE_NEAR_FAR);
+
+    camera->setCullCallback(new RTTCameraCullCallback());
 
     if (backFace)
     {
@@ -408,7 +472,7 @@ int main(int argc, char** argv)
     unsigned int width = traits->width;
     unsigned int height = traits->height;
 
-    viewer.getCamera()->setComputeNearFarMode(osg::CullSettings::DO_NOT_COMPUTE_NEAR_FAR);
+    // viewer.getCamera()->setComputeNearFarMode(osg::CullSettings::DO_NOT_COMPUTE_NEAR_FAR);
 
     osg::ref_ptr<osg::Group> group = new osg::Group;
 
@@ -454,6 +518,8 @@ int main(int argc, char** argv)
         osg::ref_ptr<osg::Node> model = osgDB::readRefNodeFile(modelFilename);
         if (model) boundaries.push_back(model);
     }
+
+
 
     if (visibleBoundaries)
     {
@@ -501,6 +567,16 @@ int main(int argc, char** argv)
     setUpDepthStateSet(parametric_group->getOrCreateStateSet(), backDepthTextures, frontDepthTextures, width, height);
 
     group->addChild(parametric_group);
+
+    osg::BoundingBox bb;
+    for(Boundaries::iterator itr = boundaries.begin();
+        itr != boundaries.end();
+        ++itr)
+    {
+        bb.expandBy((*itr)->getBound());
+    }
+
+    group->addCullCallback(new NearFarCallback(bb));
 
     viewer.setSceneData(group);
 
