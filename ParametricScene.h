@@ -3,9 +3,10 @@
  * This application is open source is published under GNU GPL license.
 */
 
-#include <osg/ShapeDrawable>
 #include <osg/CullFace>
 #include <osg/Depth>
+#include <osg/Texture2D>
+#include <osg/Camera>
 
 
 namespace osgParametric
@@ -33,6 +34,33 @@ struct parameter_ptr
 
 };
 
+class RTTCameraCullCallback : public osg::NodeCallback
+{
+    public:
+
+        RTTCameraCullCallback() {}
+
+        virtual void operator()(osg::Node* node, osg::NodeVisitor* nv);
+
+    protected:
+
+        virtual ~RTTCameraCullCallback() {}
+};
+
+class NearFarCallback : public osg::NodeCallback
+{
+    public:
+
+        osg::BoundingBox _bb;
+
+        NearFarCallback(const osg::BoundingBox& bb) : _bb(bb) {}
+
+        virtual void operator()(osg::Node* node, osg::NodeVisitor* nv);
+
+    protected:
+
+        virtual ~NearFarCallback() {}
+};
 
 class ParametricScene : public osg::Group
 {
@@ -54,6 +82,15 @@ public:
 protected:
 
     virtual ~ParametricScene();
+
+    osg::ref_ptr<osg::Texture2D> createDepthTexture(unsigned int width, unsigned int height);
+
+    osg::ref_ptr<osg::Camera> createDepthCamera(parameter_ptr<osg::Texture> depthTexture, bool backFace);
+
+    typedef std::vector< osg::ref_ptr<osg::Texture2D> > Textures;
+
+    void setUpDepthStateSet(osg::StateSet* stateset, Textures& backFaceDepthTextures, Textures& frontFaceDepthTextures, unsigned int width, unsigned int height);
+
 
     struct Subgraph : public osg::Referenced
     {
