@@ -57,6 +57,10 @@ void main(void)
     #if NUM_DEPTH_TEXTURES>=3
         if (outside(texcoord, depth, backDepthTexture2, frontDepthTexture2)) discard;
     #endif
+
+    #if NUM_DEPTH_TEXTURES>=4
+        if (outside(texcoord, depth, backDepthTexture3, frontDepthTexture3)) discard;
+    #endif
 #endif
     gl_FragColor = color;
 };
