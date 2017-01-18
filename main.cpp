@@ -337,6 +337,7 @@ void setUpDepthStateSet(osg::StateSet* stateset, Textures& backFaceDepthTextures
 osg::ref_ptr<osg::Group> createParametric(osg::ArgumentParser& arguments)
 {
     osg::ref_ptr<osg::Group> parametric_group = new osg::Group;
+    parametric_group->setName("ParametricGroup");
 
     osg::Vec3 origin(0.0, 0.0, 0.0);
     osg::Vec3 uAxis(1.0,0.0,0.0);
@@ -411,9 +412,16 @@ int main(int argc, char** argv)
     unsigned int width = traits->width;
     unsigned int height = traits->height;
 
+    osg::ref_ptr<osgParametric::ParametricScene> ps;
+
+    if (arguments.read("--ps"))
+    {
+        ps = new osgParametric::ParametricScene;
+    }
+
     // viewer.getCamera()->setComputeNearFarMode(osg::CullSettings::DO_NOT_COMPUTE_NEAR_FAR);
 
-    osg::ref_ptr<osg::Group> group = new osg::Group;
+    osg::ref_ptr<osg::Group> group = !ps ? new osg::Group : 0;
 
     bool visibleBoundaries = false;
     while(arguments.read("-b")) visibleBoundaries = true;
@@ -459,65 +467,88 @@ int main(int argc, char** argv)
     }
 
 
-
-    if (visibleBoundaries)
+    if (ps)
     {
+        ps->setDimensions(width, height);
+
         for(Boundaries::iterator itr = boundaries.begin();
             itr != boundaries.end();
             ++itr)
         {
-            group->addChild(*itr);
+            ps->addSubgraph(*itr, visibleBoundaries, depthBoundaries);
         }
+
+        osg::ref_ptr<osg::Group> parametric_group = createParametric(arguments);
+
+        ps->addSubgraph(parametric_group, true, true);
+
+        ps->setup();
+
+        ps->getOrCreateStateSet()->setAttribute(createProgram(arguments));
+
+        viewer.setSceneData( ps.get() );
     }
-
-    Textures frontDepthTextures;
-    Textures backDepthTextures;
-
-    if (depthBoundaries)
+    else
     {
+        if (visibleBoundaries)
+        {
+            for(Boundaries::iterator itr = boundaries.begin();
+                itr != boundaries.end();
+                ++itr)
+            {
+                group->addChild(*itr);
+            }
+        }
+
+        Textures frontDepthTextures;
+        Textures backDepthTextures;
+
+        if (depthBoundaries)
+        {
+            for(Boundaries::iterator itr = boundaries.begin();
+                itr != boundaries.end();
+                ++itr)
+            {
+                osg::ref_ptr<osg::Node> boundarySubgraph = *itr;
+
+                // set up the depth texture for front face of the boundary
+                osg::ref_ptr<osg::Texture2D> frontDepthTexture = createDepthTexture(width, height);
+                osg::ref_ptr<osg::Camera> frontDepthCamera = createDepthCamera(frontDepthTexture, false);
+                frontDepthCamera->getOrCreateStateSet()->setAttributeAndModes(new osg::CullFace(osg::CullFace::BACK), osg::StateAttribute::ON);
+                frontDepthCamera->addChild(boundarySubgraph);
+                group->addChild(frontDepthCamera);
+                frontDepthTextures.push_back(frontDepthTexture);
+
+                // set up the depth texture for back face of the boundary
+                osg::ref_ptr<osg::Texture2D> backDepthTexture = createDepthTexture(width, height);
+                osg::ref_ptr<osg::Camera> backDepthCamera = createDepthCamera(backDepthTexture, true);
+                backDepthCamera->getOrCreateStateSet()->setAttributeAndModes(new osg::CullFace(osg::CullFace::FRONT), osg::StateAttribute::ON);
+                backDepthCamera->addChild(boundarySubgraph);
+                group->addChild(backDepthCamera);
+                backDepthTextures.push_back(backDepthTexture);
+            }
+        }
+
+        osg::ref_ptr<osg::Group> parametric_group = createParametric(arguments);
+
+        parametric_group->getOrCreateStateSet()->setAttribute(createProgram(arguments));
+
+        setUpDepthStateSet(parametric_group->getOrCreateStateSet(), backDepthTextures, frontDepthTextures, width, height);
+
+        group->addChild(parametric_group);
+
+        osg::BoundingBox bb;
         for(Boundaries::iterator itr = boundaries.begin();
             itr != boundaries.end();
             ++itr)
         {
-            osg::ref_ptr<osg::Node> boundarySubgraph = *itr;
-
-            // set up the depth texture for front face of the boundary
-            osg::ref_ptr<osg::Texture2D> frontDepthTexture = createDepthTexture(width, height);
-            osg::ref_ptr<osg::Camera> frontDepthCamera = createDepthCamera(frontDepthTexture, false);
-            frontDepthCamera->getOrCreateStateSet()->setAttributeAndModes(new osg::CullFace(osg::CullFace::BACK), osg::StateAttribute::ON);
-            frontDepthCamera->addChild(boundarySubgraph);
-            group->addChild(frontDepthCamera);
-            frontDepthTextures.push_back(frontDepthTexture);
-
-            // set up the depth texture for back face of the boundary
-            osg::ref_ptr<osg::Texture2D> backDepthTexture = createDepthTexture(width, height);
-            osg::ref_ptr<osg::Camera> backDepthCamera = createDepthCamera(backDepthTexture, true);
-            backDepthCamera->getOrCreateStateSet()->setAttributeAndModes(new osg::CullFace(osg::CullFace::FRONT), osg::StateAttribute::ON);
-            backDepthCamera->addChild(boundarySubgraph);
-            group->addChild(backDepthCamera);
-            backDepthTextures.push_back(backDepthTexture);
+            bb.expandBy((*itr)->getBound());
         }
+
+        group->addCullCallback(new osgParametric::NearFarCallback(bb));
+
+        viewer.setSceneData(group);
     }
-
-    osg::ref_ptr<osg::Group> parametric_group = createParametric(arguments);
-
-    parametric_group->getOrCreateStateSet()->setAttribute(createProgram(arguments));
-
-    setUpDepthStateSet(parametric_group->getOrCreateStateSet(), backDepthTextures, frontDepthTextures, width, height);
-
-    group->addChild(parametric_group);
-
-    osg::BoundingBox bb;
-    for(Boundaries::iterator itr = boundaries.begin();
-        itr != boundaries.end();
-        ++itr)
-    {
-        bb.expandBy((*itr)->getBound());
-    }
-
-    group->addCullCallback(new osgParametric::NearFarCallback(bb));
-
-    viewer.setSceneData(group);
 
     std::string filename;
     if (arguments.read("-o",filename))

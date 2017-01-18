@@ -73,15 +73,23 @@ public:
 
     META_Node(osgParametric, ParametricScene);
 
+    void setDimensions(unsigned int w, unsigned int h) { _width = w; _height = h; }
+
+    void setWidth(unsigned int w) { _width = w; }
+    unsigned int getWidth() const { return _width; }
+
+    void setHeight(unsigned int h) { _height = h; }
+    unsigned int getHeight() const { return _height; }
+
     void addSubgraph(parameter_ptr<osg::Node> subgraph, bool requiresRenderSubgraph, bool requiresDepthSubgraph);
 
-    void setupRenderSubgraphs();
-
-    void setupDepthSubgraphs();
+    void setup();
 
 protected:
 
     virtual ~ParametricScene();
+
+    void init();
 
     osg::ref_ptr<osg::Texture2D> createDepthTexture(unsigned int width, unsigned int height);
 
@@ -89,25 +97,35 @@ protected:
 
     typedef std::vector< osg::ref_ptr<osg::Texture2D> > Textures;
 
-    void setUpDepthStateSet(osg::StateSet* stateset, Textures& backFaceDepthTextures, Textures& frontFaceDepthTextures, unsigned int width, unsigned int height);
+    void setUpDepthStateSet(osg::StateSet* stateset, unsigned int width, unsigned int height);
 
+    void setupRenderSubgraphs();
+
+    void setupDepthSubgraphs();
 
     struct Subgraph : public osg::Referenced
     {
-        Subgraph(parameter_ptr<osg::Node> subgrah, bool rrs, bool rds);
+        Subgraph(parameter_ptr<osg::Node> sg, bool rrs, bool rds);
 
-        osg::ref_ptr<osg::Node>     subgraph;
-        bool                        requiresRenderSubgraph;
-        bool                        requiresDepthSubgraph;
+        osg::ref_ptr<osg::Node>         subgraph;
 
-        osg::ref_ptr<osg::Node>     renderSubgraph;
-        osg::ref_ptr<osg::Node>     depthSugraph;
-        osg::ref_ptr<osg::Texture>  frontTexture;
-        osg::ref_ptr<osg::Texture>  backTexture;
+        bool                            requiresRenderSubgraph;
+        bool                            requiresDepthSubgraph;
+
+        osg::ref_ptr<osg::Texture2D>    frontTexture;
+        osg::ref_ptr<osg::Texture2D>    backTexture;
     };
 
     typedef std::vector< osg::ref_ptr<Subgraph> > Subgraphs;
+
+    unsigned int _width;
+    unsigned int _height;
+
+
     Subgraphs _subgraphs;
+
+    osg::ref_ptr<osg::Group> _renderSubgraph;
+    osg::ref_ptr<osg::Group> _depthSubgraph;
 };
 
 }

@@ -53,8 +53,8 @@ void NearFarCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
 //
 // ParametricScene::Subgraph
 //
-ParametricScene::Subgraph::Subgraph(parameter_ptr<osg::Node> subgrah, bool rrs, bool rds):
-    subgraph(subgraph),
+ParametricScene::Subgraph::Subgraph(parameter_ptr<osg::Node> sg, bool rrs, bool rds):
+    subgraph(sg.get()),
     requiresRenderSubgraph(rrs),
     requiresDepthSubgraph(rds)
 {
@@ -67,14 +67,30 @@ ParametricScene::Subgraph::Subgraph(parameter_ptr<osg::Node> subgrah, bool rrs, 
 //
 ParametricScene::ParametricScene()
 {
+    init();
 }
 
 ParametricScene::ParametricScene(const ParametricScene& ps,const osg::CopyOp& copyop)
 {
+    init();
 }
 
 ParametricScene::~ParametricScene()
 {
+}
+
+void ParametricScene::init()
+{
+    _width = 1280;
+    _height = 1024;
+
+    _renderSubgraph = new osg::Group;
+    _renderSubgraph->setName("RenderSubgraph");
+    addChild(_renderSubgraph.get());
+
+    _depthSubgraph = new osg::Group;
+    _depthSubgraph->setName("DepthSubgraph");
+    addChild(_depthSubgraph.get());
 }
 
 void ParametricScene::addSubgraph(parameter_ptr<osg::Node> subgraph, bool requiresRenderSubgraph, bool requiresDepthSubgraph)
@@ -82,12 +98,78 @@ void ParametricScene::addSubgraph(parameter_ptr<osg::Node> subgraph, bool requir
     _subgraphs.push_back(new Subgraph(subgraph, requiresRenderSubgraph, requiresDepthSubgraph));
 }
 
+void ParametricScene::setup()
+{
+    setupDepthSubgraphs();
+    setupRenderSubgraphs();
+
+    osg::BoundingBox bb;
+    for(Subgraphs::iterator itr = _subgraphs.begin();
+        itr != _subgraphs.end();
+        ++itr)
+    {
+        Subgraph* sg = itr->get();
+        if (sg->subgraph) bb.expandBy(sg->subgraph->getBound());
+    }
+
+    setCullCallback(new osgParametric::NearFarCallback(bb));
+}
+
 void ParametricScene::setupRenderSubgraphs()
 {
+    _renderSubgraph->removeChildren(0, _renderSubgraph->getNumChildren());
+
+    setUpDepthStateSet(_renderSubgraph->getOrCreateStateSet(), _width, _height);
+
+    for(Subgraphs::iterator itr = _subgraphs.begin();
+        itr != _subgraphs.end();
+        ++itr)
+    {
+        Subgraph* sg = itr->get();
+        if (sg->requiresRenderSubgraph)
+        {
+            if ((*itr)->subgraph)
+            {
+                _renderSubgraph->addChild((*itr)->subgraph);
+            }
+        }
+    }
 }
 
 void ParametricScene::setupDepthSubgraphs()
 {
+    _depthSubgraph->removeChildren(0, _depthSubgraph->getNumChildren());
+
+    for(Subgraphs::iterator itr = _subgraphs.begin();
+        itr != _subgraphs.end();
+        ++itr)
+    {
+        Subgraph* sg = itr->get();
+        if (sg->requiresDepthSubgraph)
+        {
+            osg::ref_ptr<osg::Node> boundarySubgraph = (*itr)->subgraph;
+
+            // set up the depth texture for front face of the boundary
+            osg::ref_ptr<osg::Texture2D> frontDepthTexture = createDepthTexture(_width, _height);
+            osg::ref_ptr<osg::Camera> frontDepthCamera = createDepthCamera(frontDepthTexture, false);
+            frontDepthCamera->getOrCreateStateSet()->setAttributeAndModes(new osg::CullFace(osg::CullFace::BACK), osg::StateAttribute::ON);
+            frontDepthCamera->addChild(boundarySubgraph);
+
+            _depthSubgraph->addChild(frontDepthCamera.get());
+
+            sg->frontTexture = frontDepthTexture;
+
+            // set up the depth texture for back face of the boundary
+            osg::ref_ptr<osg::Texture2D> backDepthTexture = createDepthTexture(_width, _height);
+            osg::ref_ptr<osg::Camera> backDepthCamera = createDepthCamera(backDepthTexture, true);
+            backDepthCamera->getOrCreateStateSet()->setAttributeAndModes(new osg::CullFace(osg::CullFace::FRONT), osg::StateAttribute::ON);
+            backDepthCamera->addChild(boundarySubgraph);
+
+            _depthSubgraph->addChild(backDepthCamera.get());
+
+            sg->backTexture = backDepthTexture;
+        }
+    }
 }
 
 
@@ -125,6 +207,8 @@ osg::ref_ptr<osg::Camera> ParametricScene::createDepthCamera(parameter_ptr<osg::
 
     camera->setComputeNearFarMode(osg::CullSettings::DO_NOT_COMPUTE_NEAR_FAR);
 
+    camera->setCullCallback(new osgParametric::RTTCameraCullCallback());
+
     if (backFace)
     {
         camera->getOrCreateStateSet()->setAttribute(new osg::Depth(osg::Depth::GREATER));
@@ -139,8 +223,20 @@ osg::ref_ptr<osg::Camera> ParametricScene::createDepthCamera(parameter_ptr<osg::
     return camera;
 }
 
-void ParametricScene::setUpDepthStateSet(osg::StateSet* stateset, Textures& backFaceDepthTextures, Textures& frontFaceDepthTextures, unsigned int width, unsigned int height)
+void ParametricScene::setUpDepthStateSet(osg::StateSet* stateset, unsigned int width, unsigned int height)
 {
+    Textures backFaceDepthTextures, frontFaceDepthTextures;
+
+    for(Subgraphs::iterator itr = _subgraphs.begin();
+        itr != _subgraphs.end();
+        ++itr)
+    {
+        Subgraph* sg = itr->get();
+        if (sg->frontTexture) frontFaceDepthTextures.push_back(sg->frontTexture.get());
+        if (sg->backTexture) backFaceDepthTextures.push_back(sg->backTexture.get());
+    }
+
+
     std::stringstream name;
     int unit=0;
     unsigned int numDepthTextures = std::min(backFaceDepthTextures.size(), frontFaceDepthTextures.size());
@@ -167,3 +263,24 @@ void ParametricScene::setUpDepthStateSet(osg::StateSet* stateset, Textures& back
 
     stateset->addUniform(new osg::Uniform("viewportDimensions",osg::Vec4(0.0f,0.0f,static_cast<float>(width),static_cast<float>(height))));
 }
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//  Serializers for ParametricScene
+//
+#include <osgDB/ObjectWrapper>
+#include <osgDB/InputStream>
+#include <osgDB/OutputStream>
+
+REGISTER_OBJECT_WRAPPER( ParametricScene,
+                         new osgParametric::ParametricScene,
+                         osgParametric::ParametricScene,
+                         "osg::Object osg::Node osgParametric::ParametricScene osg::Group" )
+{
+    ADD_UINT_SERIALIZER( Width, 0 );
+    ADD_UINT_SERIALIZER( Height, 0 );
+//    ADD_OBJECT_SERIALIZER( Settings, osgParametric::Settings, NULL );
+//    ADD_VECTOR_SERIALIZER( Roads, osgParametric::RoadNetwork::Roads, osgDB::BaseSerializer::RW_OBJECT, 0 );
+}
+
