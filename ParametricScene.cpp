@@ -119,8 +119,6 @@ void ParametricScene::setupRenderSubgraphs()
 {
     _renderSubgraph->removeChildren(0, _renderSubgraph->getNumChildren());
 
-    setUpDepthStateSet(_renderSubgraph->getOrCreateStateSet(), _width, _height);
-
     for(Subgraphs::iterator itr = _subgraphs.begin();
         itr != _subgraphs.end();
         ++itr)
@@ -130,7 +128,12 @@ void ParametricScene::setupRenderSubgraphs()
         {
             if ((*itr)->subgraph)
             {
-                _renderSubgraph->addChild((*itr)->subgraph);
+                osg::ref_ptr<osg::Group> group = new osg::Group;
+                group->addChild((*itr)->subgraph);
+
+                setupRenderStateSet(sg, group->getOrCreateStateSet(), _width, _height);
+
+                _renderSubgraph->addChild(group);
             }
         }
     }
@@ -223,7 +226,7 @@ osg::ref_ptr<osg::Camera> ParametricScene::createDepthCamera(parameter_ptr<osg::
     return camera;
 }
 
-void ParametricScene::setUpDepthStateSet(osg::StateSet* stateset, unsigned int width, unsigned int height)
+void ParametricScene::setupRenderStateSet(Subgraph* sgToExclude, osg::StateSet* stateset, unsigned int width, unsigned int height)
 {
     Textures backFaceDepthTextures, frontFaceDepthTextures;
 
@@ -232,10 +235,12 @@ void ParametricScene::setUpDepthStateSet(osg::StateSet* stateset, unsigned int w
         ++itr)
     {
         Subgraph* sg = itr->get();
-        if (sg->frontTexture) frontFaceDepthTextures.push_back(sg->frontTexture.get());
-        if (sg->backTexture) backFaceDepthTextures.push_back(sg->backTexture.get());
+        if (sg!=sgToExclude)
+        {
+            if (sg->frontTexture) frontFaceDepthTextures.push_back(sg->frontTexture.get());
+            if (sg->backTexture) backFaceDepthTextures.push_back(sg->backTexture.get());
+        }
     }
-
 
     std::stringstream name;
     int unit=0;

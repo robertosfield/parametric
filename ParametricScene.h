@@ -97,11 +97,6 @@ protected:
 
     typedef std::vector< osg::ref_ptr<osg::Texture2D> > Textures;
 
-    void setUpDepthStateSet(osg::StateSet* stateset, unsigned int width, unsigned int height);
-
-    void setupRenderSubgraphs();
-
-    void setupDepthSubgraphs();
 
     struct Subgraph : public osg::Referenced
     {
@@ -118,9 +113,14 @@ protected:
 
     typedef std::vector< osg::ref_ptr<Subgraph> > Subgraphs;
 
+    void setupRenderStateSet(Subgraph* sgToExclude, osg::StateSet* stateset, unsigned int width, unsigned int height);
+
+    void setupRenderSubgraphs();
+
+    void setupDepthSubgraphs();
+
     unsigned int _width;
     unsigned int _height;
-
 
     Subgraphs _subgraphs;
 
