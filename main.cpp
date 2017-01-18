@@ -408,20 +408,19 @@ int main(int argc, char** argv)
         return 0;
     }
 
+
+    osg::ref_ptr<osgParametric::ParametricScene> ps = new osgParametric::ParametricScene;
+
+    // provide the ParametricScene node with the dimensions of the window so it can correctly size the textures
     const osg::GraphicsContext::Traits* traits = windows.front()->getTraits();
-    unsigned int width = traits->width;
-    unsigned int height = traits->height;
+    ps->setDimensions(traits->width, traits->height);
 
-    osg::ref_ptr<osgParametric::ParametricScene> ps;
+    // aset up the shaders to do the parametric surface placement and depth textures
+    ps->getOrCreateStateSet()->setAttribute(createProgram(arguments));
 
-    if (arguments.read("--ps"))
-    {
-        ps = new osgParametric::ParametricScene;
-    }
 
-    // viewer.getCamera()->setComputeNearFarMode(osg::CullSettings::DO_NOT_COMPUTE_NEAR_FAR);
-
-    osg::ref_ptr<osg::Group> group = !ps ? new osg::Group : 0;
+    // assign the parametric surface
+    ps->addSubgraph(createParametric(arguments), true, true);
 
     bool visibleBoundaries = false;
     while(arguments.read("-b")) visibleBoundaries = true;
@@ -429,126 +428,46 @@ int main(int argc, char** argv)
     bool depthBoundaries = false;
     while(arguments.read("-d")) depthBoundaries = true;
 
-    typedef std::vector< osg::ref_ptr<osg::Node> > Boundaries;
-    Boundaries boundaries;
-
     osg::Vec3 center;
     osg::Vec3 dimensions;
     while(arguments.read("--sphere", center.x(), center.y(), center.z(), dimensions.x()))
     {
-        boundaries.push_back(new osg::ShapeDrawable(new osg::Sphere(center, dimensions.x())));
+        ps->addSubgraph(new osg::ShapeDrawable(new osg::Sphere(center, dimensions.x())), visibleBoundaries, depthBoundaries);
     }
 
     while(arguments.read("--box", center.x(), center.y(), center.z(), dimensions.x(), dimensions.y(), dimensions.z()))
     {
-        boundaries.push_back(new osg::ShapeDrawable(new osg::Box(center, dimensions.x(), dimensions.y(), dimensions.z())));
+        ps->addSubgraph(new osg::ShapeDrawable(new osg::Box(center, dimensions.x(), dimensions.y(), dimensions.z())), visibleBoundaries, depthBoundaries);
     }
 
     while(arguments.read("--cone", center.x(), center.y(), center.z(), dimensions.x(), dimensions.y()))
     {
-        boundaries.push_back(new osg::ShapeDrawable(new osg::Cone(center, dimensions.x(), dimensions.y())));
+        ps->addSubgraph(new osg::ShapeDrawable(new osg::Cone(center, dimensions.x(), dimensions.y())), visibleBoundaries, depthBoundaries);
     }
 
     while(arguments.read("--capsule", center.x(), center.y(), center.z(), dimensions.x(), dimensions.y()))
     {
-        boundaries.push_back(new osg::ShapeDrawable(new osg::Capsule(center, dimensions.x(), dimensions.y())));
+        ps->addSubgraph(new osg::ShapeDrawable(new osg::Capsule(center, dimensions.x(), dimensions.y())), visibleBoundaries, depthBoundaries);
     }
 
     while(arguments.read("--cylinder", center.x(), center.y(), center.z(), dimensions.x(), dimensions.y()))
     {
-        boundaries.push_back(new osg::ShapeDrawable(new osg::Cylinder(center, dimensions.x(), dimensions.y())));
+        ps->addSubgraph(new osg::ShapeDrawable(new osg::Cylinder(center, dimensions.x(), dimensions.y())), visibleBoundaries, depthBoundaries);
     }
 
     std::string modelFilename;
     while(arguments.read("--model", modelFilename))
     {
         osg::ref_ptr<osg::Node> model = osgDB::readRefNodeFile(modelFilename);
-        if (model) boundaries.push_back(model);
+        if (model) ps->addSubgraph(model, visibleBoundaries, depthBoundaries);
     }
 
 
-    if (ps)
-    {
-        ps->setDimensions(width, height);
+    // create the subgraphs that will do all the rendering
+    ps->setup();
 
-        for(Boundaries::iterator itr = boundaries.begin();
-            itr != boundaries.end();
-            ++itr)
-        {
-            ps->addSubgraph(*itr, visibleBoundaries, depthBoundaries);
-        }
 
-        osg::ref_ptr<osg::Group> parametric_group = createParametric(arguments);
-
-        ps->addSubgraph(parametric_group, true, true);
-
-        ps->setup();
-
-        ps->getOrCreateStateSet()->setAttribute(createProgram(arguments));
-
-        viewer.setSceneData( ps.get() );
-    }
-    else
-    {
-        if (visibleBoundaries)
-        {
-            for(Boundaries::iterator itr = boundaries.begin();
-                itr != boundaries.end();
-                ++itr)
-            {
-                group->addChild(*itr);
-            }
-        }
-
-        Textures frontDepthTextures;
-        Textures backDepthTextures;
-
-        if (depthBoundaries)
-        {
-            for(Boundaries::iterator itr = boundaries.begin();
-                itr != boundaries.end();
-                ++itr)
-            {
-                osg::ref_ptr<osg::Node> boundarySubgraph = *itr;
-
-                // set up the depth texture for front face of the boundary
-                osg::ref_ptr<osg::Texture2D> frontDepthTexture = createDepthTexture(width, height);
-                osg::ref_ptr<osg::Camera> frontDepthCamera = createDepthCamera(frontDepthTexture, false);
-                frontDepthCamera->getOrCreateStateSet()->setAttributeAndModes(new osg::CullFace(osg::CullFace::BACK), osg::StateAttribute::ON);
-                frontDepthCamera->addChild(boundarySubgraph);
-                group->addChild(frontDepthCamera);
-                frontDepthTextures.push_back(frontDepthTexture);
-
-                // set up the depth texture for back face of the boundary
-                osg::ref_ptr<osg::Texture2D> backDepthTexture = createDepthTexture(width, height);
-                osg::ref_ptr<osg::Camera> backDepthCamera = createDepthCamera(backDepthTexture, true);
-                backDepthCamera->getOrCreateStateSet()->setAttributeAndModes(new osg::CullFace(osg::CullFace::FRONT), osg::StateAttribute::ON);
-                backDepthCamera->addChild(boundarySubgraph);
-                group->addChild(backDepthCamera);
-                backDepthTextures.push_back(backDepthTexture);
-            }
-        }
-
-        osg::ref_ptr<osg::Group> parametric_group = createParametric(arguments);
-
-        parametric_group->getOrCreateStateSet()->setAttribute(createProgram(arguments));
-
-        setUpDepthStateSet(parametric_group->getOrCreateStateSet(), backDepthTextures, frontDepthTextures, width, height);
-
-        group->addChild(parametric_group);
-
-        osg::BoundingBox bb;
-        for(Boundaries::iterator itr = boundaries.begin();
-            itr != boundaries.end();
-            ++itr)
-        {
-            bb.expandBy((*itr)->getBound());
-        }
-
-        group->addCullCallback(new osgParametric::NearFarCallback(bb));
-
-        viewer.setSceneData(group);
-    }
+    viewer.setSceneData( ps.get() );
 
     std::string filename;
     if (arguments.read("-o",filename))

@@ -25,6 +25,9 @@ struct parameter_ptr
     template<typename P>
     parameter_ptr(osg::ref_ptr<P>& rptr):_ptr(rptr.get()) {}
 
+    template<typename P>
+    parameter_ptr(const osg::ref_ptr<P>& rptr):_ptr(rptr.get()) {}
+
     T& operator*() const { return *_ptr; }
     T* operator->() const { return _ptr; }
     T* get() const { return _ptr; }
