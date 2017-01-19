@@ -276,8 +276,18 @@ osg::ref_ptr<osg::Group> createParametric(osg::ArgumentParser& arguments)
     while (arguments.read("--walls")) renderSidewalls=true;
     while (arguments.read("--all")) { renderBase = true; renderTop = true; renderSidewalls = true; }
 
-    std::string z_function;
-    while(arguments.read("--Z_FUNCTION",z_function)) { parametric_group->getOrCreateStateSet()->setDefine("Z_FUNCTION", z_function); }
+    std::string function;
+    while(arguments.read("--Z_FUNCTION", function)) { parametric_group->getOrCreateStateSet()->setDefine("Z_FUNCTION", function); }
+    while(arguments.read("--Z_BASE", function)) { parametric_group->getOrCreateStateSet()->setDefine("Z_BASE", function); }
+    while(arguments.read("--Z_TOP", function)) { parametric_group->getOrCreateStateSet()->setDefine("Z_TOP", function); }
+
+    std::string name;
+    float value;
+    while(arguments.read("--uniform",name,value))
+    {
+        parametric_group->getOrCreateStateSet()->addUniform(new osg::Uniform(name.c_str(), value));
+    }
+
 
     // base
     if (renderBase)

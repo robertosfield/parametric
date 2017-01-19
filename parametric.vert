@@ -1,9 +1,13 @@
-#pragma import_defines(Z_FUNCTION)
+#pragma import_defines(Z_FUNCTION, Z_BASE, Z_TOP)
 
 uniform vec3 verticalAxis;
 
 varying vec4 color;
 varying vec4 v;
+
+#if !defined(Z_FUNCTION) && defined(Z_BASE) && defined(Z_TOP)
+    #define Z_FUNCTION(x,y,z) ((z==0.0) ? Z_BASE(x,y,z) : Z_TOP(x,y,z))
+#endif
 
 #ifdef Z_FUNCTION
 vec4 computePosition(float x, float y, float z)
