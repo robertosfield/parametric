@@ -47,7 +47,7 @@ void main(void)
 #ifdef Z_FUNCTION
     v = computePosition( gl_Vertex.x, gl_Vertex.y, gl_Vertex.z);
 
-    if (n.x==0.0 && n.y==0 && n.z==0.0)
+    if (n.x==0.0 && n.y==0.0 && n.z==0.0)
     {
         n = computeNormal( gl_Vertex.x, gl_Vertex.y, gl_Vertex.z );
     }
