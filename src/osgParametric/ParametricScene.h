@@ -3,6 +3,8 @@
  * This application is open source is published under GNU GPL license.
 */
 
+#include <osgParametric/Export>
+
 #include <osg/CullFace>
 #include <osg/Depth>
 #include <osg/Texture2D>
@@ -65,7 +67,7 @@ class NearFarCallback : public osg::NodeCallback
         virtual ~NearFarCallback() {}
 };
 
-class ParametricScene : public osg::Group
+class OSGPARAMETRIC_EXPORT ParametricScene : public osg::Group
 {
 public:
 
