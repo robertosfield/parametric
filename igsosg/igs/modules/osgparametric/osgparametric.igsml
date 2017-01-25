@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openigs xmlns:igs="http://openigs.org/2009/igs"
+         xmlns:sg="http://openigs.org/2009/sg">
+
+  <igs:ConfigManager>
+    <Urls>
+      <urls>
+        $OPENIGS_ROOT/share/openigs/configs/gui/gui-workspacegraphicsparent.igsml,
+        $OPENIGS_ROOT/share/openigs/configs/sg/sg-graphicswindow.igsml
+      </urls>
+    </Urls>
+  </igs:ConfigManager>
+  <igs:ModuleLoader>
+    <Reset />
+    <Libraries>
+      <libraries>osgparametricmodules</libraries>
+    </Libraries>
+    <Load />
+  </igs:ModuleLoader>
+  <sg:Scene name="Default">
+    <Children>
+      <children>
+        <sg:ParametricNode name="ParametricNode">
+          <GraphicsState>
+            <graphicsState>
+              <sg:GraphicsState name="ParametricState">
+                <Attributes>
+                  <attributes>
+                    <sg:Program name="ParametricProgram">
+                      <Shaders>
+                        <shaders>
+                          <sg:Shader name="ParametricVertexShader">
+                            <Type>
+                              <type>Vertex</type>
+                            </Type>
+                            <Filename>
+                              <filename>$OPENIGS_ROOT/share/openigs/examples/osg/parametric/parametric3.vert</filename>
+                            </Filename>
+                          </sg:Shader>
+                          <sg:Shader name="ParametricFragmentShader">
+                            <Type>
+                              <type>Fragment</type>
+                            </Type>
+                            <Filename>
+                              <filename>$OPENIGS_ROOT/share/openigs/examples/osg/parametric/parametric.frag</filename>
+                            </Filename>
+                          </sg:Shader>
+                        </shaders>
+                      </Shaders>
+                    </sg:Program>
+                  </attributes>
+                </Attributes>
+              </sg:GraphicsState>
+            </graphicsState>
+          </GraphicsState>
+          <Dimensions>
+            <width>800</width>
+            <height>600</height>
+          </Dimensions>
+          <RenderBase>
+            <renderBase>true</renderBase>
+          </RenderBase>
+          <RenderSidewalls>
+            <renderSidewalls>true</renderSidewalls>
+          </RenderSidewalls>
+          <RenderTop>
+            <renderTop>true</renderTop>
+          </RenderTop>
+          <VisibleBoundaries>
+            <visibleBoundaries>true</visibleBoundaries>
+          </VisibleBoundaries>
+          <NumCells>
+            <uCells>1000</uCells>
+            <vCells>1000</vCells>
+          </NumCells>
+          <Setup/>
+        </sg:ParametricNode>
+      </children>
+    </Children>
+  </sg:Scene>
+</openigs>
