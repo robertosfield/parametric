@@ -1,6 +1,7 @@
 #pragma import_defines(Z_FUNCTION, Z_BASE, Z_TOP)
 
 uniform vec3 verticalAxis;
+uniform float osg_SimulationTime;
 
 varying vec4 color;
 varying vec4 v;
