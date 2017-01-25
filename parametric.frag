@@ -63,4 +63,4 @@ void main(void)
     #endif
 #endif
     gl_FragColor = color;
-};
+}

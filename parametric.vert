@@ -86,4 +86,4 @@ void main(void)
     color.a = 1.0;
 
     gl_Position = gl_ModelViewProjectionMatrix * v;
-};
+}
