@@ -118,12 +118,12 @@ osg::ref_ptr<osg::Geometry> createMesh(const osg::Vec3& origin, const osg::Vec3&
     return geometry;
 }
 
-osg::ref_ptr<osg::Geometry> createSideWalls(const osg::Vec3& baseOrigin, const osg::Vec3& topOrigin, const osg::Vec3& uAxis, const osg::Vec3& vAxis, unsigned int uCells, unsigned vCells)
+osg::ref_ptr<osg::Geometry> createSideWalls(const osg::Vec3& baseOrigin, const osg::Vec3& topOrigin, const osg::Vec3& uAxis, const osg::Vec3& vAxis, int uCells, int vCells)
 {
     osg::ref_ptr<osg::Geometry> geometry = new osg::Geometry;
     geometry->setUseVertexBufferObjects(true);
 
-    unsigned int numVertices = 2*(uCells+1) + 2*(vCells+1);
+    int numVertices = 2*(uCells+1) + 2*(vCells+1);
 
 
     // set up vertices
