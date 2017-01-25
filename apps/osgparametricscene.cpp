@@ -15,7 +15,7 @@
 #include <osgViewer/Viewer>
 #include <osgViewer/ViewerEventHandlers>
 
-#include "ParametricScene.h"
+#include <osgParametric/ParametricScene.h>
 
 
 osg::ref_ptr<osg::Geometry> createMesh(const osg::Vec3& origin, const osg::Vec3& uAxis, const osg::Vec3& vAxis, unsigned int uCells, unsigned vCells, bool top)
