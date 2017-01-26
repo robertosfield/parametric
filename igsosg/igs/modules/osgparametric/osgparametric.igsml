@@ -86,19 +86,24 @@
       <visible>true</visible>
     </Visible>
   </gui:Container>
-<!--
+
   <gui:DockWindow name="OpenIGSLogWindowDockWindow">
     <Visible>
       <visible>false</visible>
     </Visible>
   </gui:DockWindow>
-  <gui:DockWindow name="OpenIGSScriptEditorWindowDockWindow">
+  <gui:DockWindow name="OpenIGSScriptEditorDockWindow">
     <Visible>
       <visible>false</visible>
     </Visible>
   </gui:DockWindow>
--->
+
   <dbgui:PropertyEditor name="OpenIGSPropertyEditor">
+    <Module>
+      <module>
+        <sg:ParametricNode name="ParametricNode"/>
+      </module>
+    </Module>
     <Interactive>
       <interactive>true</interactive>
     </Interactive>
@@ -107,5 +112,17 @@
         <sg:Shader name="ParametricVertexShader"/>
       </module>
     </Module>
+    <Interactive>
+      <interactive>true</interactive>
+    </Interactive>
+    <Module>
+      <module>
+        <sg:Camera name="Default"/>
+      </module>
+    </Module>
+    <Interactive>
+      <interactive>true</interactive>
+    </Interactive>
   </dbgui:PropertyEditor>
+
 </openigs>
