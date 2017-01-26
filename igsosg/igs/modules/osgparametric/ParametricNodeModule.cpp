@@ -111,10 +111,10 @@ classInfo<osgParametric::ParametricNode>()
       .addProperty(
           Property( "ZFunction", Property::Persistent,
               Member("getZFunction", &osgParametric::ParametricNode::zFunction,
-                  Return("zFunction", false, Return::Out)
+                  Return("zFunction", std::string(), Return::Out)
               ),
               Member("setZFunction", &osgParametric::ParametricNode::zFunction,
-                  Parameter("zFunction", false, Parameter::In)
+                  Parameter("zFunction", std::string(), Parameter::In)
               ),
               Signal()
           )
@@ -123,10 +123,10 @@ classInfo<osgParametric::ParametricNode>()
       .addProperty(
           Property( "ZBase", Property::Persistent,
               Member("getZBase", &osgParametric::ParametricNode::zBase,
-                  Return("zBase", false, Return::Out)
+                  Return("zBase", std::string(), Return::Out)
               ),
               Member("setZBase", &osgParametric::ParametricNode::zBase,
-                  Parameter("zBase", false, Parameter::In)
+                  Parameter("zBase", std::string(), Parameter::In)
               ),
               Signal()
           )
@@ -135,10 +135,10 @@ classInfo<osgParametric::ParametricNode>()
       .addProperty(
           Property( "ZTop", Property::Persistent,
               Member("getZTope", &osgParametric::ParametricNode::zTop,
-                  Return("zTop", false, Return::Out)
+                  Return("zTop", std::string(), Return::Out)
               ),
               Member("setZTop", &osgParametric::ParametricNode::zTop,
-                  Parameter("zTop", false, Parameter::In)
+                  Parameter("zTop", std::string(), Parameter::In)
               ),
               Signal()
           )
