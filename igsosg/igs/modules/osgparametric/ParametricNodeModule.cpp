@@ -145,10 +145,12 @@ classInfo<osgParametric::ParametricNode>()
       )
 
       .addProperty(
-          Property( "Subgraph", Property::Persistent,
-              Operation(),
-              Method("addSubgraph", &osgParametric::ParametricNode::addSubgraph,
-                  Parameter("subgraph", (osg::Node *)0, Parameter::In)
+          Property( "Subgraphs", Property::Persistent,
+              Method("getSubgraphs", &osgParametric::ParametricNode::getSubgraphs,
+                  Return("subgraphs", osgParametric::NodeVec(), Return::Out)
+              ),
+              Method("addSubgraphs", &osgParametric::ParametricNode::addSubgraphs,
+                  Parameter("subgraphs", osgParametric::NodeVec(), Parameter::In)
               ),
               Signal()
           )
