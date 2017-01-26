@@ -29,7 +29,7 @@ public:
     META_Node(osgParametric, ParametricNode);
 
     void setDimensions(unsigned int w, unsigned int h);
-    void getDimensions(unsigned int & w, unsigned int & h) const;
+    void getDimensions(unsigned int & w, unsigned int & h) const { w = _width; h = _height; }
 
     void setNumCells(unsigned int uc, unsigned int vc) { uCells = uc; vCells = vc; }
     void getNumCells(unsigned int & uc, unsigned int & vc) const { uc = uCells; vc = vCells; }
@@ -61,6 +61,8 @@ protected:
 
     osg::ref_ptr<ParametricScene> _parametricScene;
 
+    unsigned int _width = 800;
+    unsigned int _height = 600;
     NodeVec _subgraphs;
 };
 

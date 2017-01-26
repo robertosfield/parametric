@@ -32,13 +32,8 @@ ParametricNode::~ParametricNode()
 
 void ParametricNode::setDimensions(unsigned int w, unsigned int h)
 {
-    _parametricScene->setDimensions(w, h);
-}
-
-void ParametricNode::getDimensions(unsigned int & w, unsigned int & h) const
-{
-    w = _parametricScene->getWidth();
-    h = _parametricScene->getHeight();
+    _width = w;
+    _height = h;
 }
 
 void ParametricNode::addSubgraphs(NodeVec const & subgraphs)
@@ -55,8 +50,6 @@ void ParametricNode::addSubgraph(NodePtr const & subgraph)
 
 void ParametricNode::init()
 {
-    _parametricScene = new ParametricScene;
-    addChild(_parametricScene);
 }
 
 static osg::ref_ptr<osg::Geometry> createMesh(const osg::Vec3& origin, const osg::Vec3& uAxis, const osg::Vec3& vAxis, unsigned int uCells, unsigned vCells, bool top)
@@ -302,8 +295,18 @@ void ParametricNode::setup()
     if (!zBase.empty()) { parametric_group->getOrCreateStateSet()->setDefine("Z_BASE", zBase); }
     if (!zTop.empty()) { parametric_group->getOrCreateStateSet()->setDefine("Z_TOP", zTop); }
 
+    removeChildren(0, getNumChildren());
+
+    _parametricScene = new ParametricScene;
+    _parametricScene->setDimensions(_width, _height);
 
     _parametricScene->addSubgraph(parametric_group, true, true);
 
+    for (auto subgraph : _subgraphs) {
+      _parametricScene->addSubgraph(subgraph, visibleBoundaries, depthBoundaries);
+    }
+
     _parametricScene->setup();
+    addChild(_parametricScene);
+
 }
