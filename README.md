@@ -27,3 +27,7 @@ To run:
     Using the osg_SimulationTime uniform provided by the OSG to animate the bottom and top surfaces functions
 
         ./parametric --rows 100 --columns 100 --shader parametric.vert --shader parametric.frag --cylinder 0.5 0.5 0.5 0.4 2.2 --all --Z_BASE "(x, y, z) (-0.1*sin(x*y*6.28+osg_SimulationTime))"  --Z_TOP "(x,y,z) ((x-x*x)*(y-y*y)*5.0+0.2*sin(osg_SimulationTime))" -b -d
+		
+    Using the new directory structure, assuming you've installed everything and set up your environment.
+	From the src/osgParametric directory, run:
+        osgparametricnode --window 10 10 600 400 --rows 100 --columns 100 --shader parametric3.vert --shader parametric.frag --cylinder 0.5 0.5 0.5 0.4 2.2 --all -b -d
