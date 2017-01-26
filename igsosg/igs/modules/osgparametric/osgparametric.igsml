@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openigs xmlns:igs="http://openigs.org/2009/igs"
-         xmlns:dbgui="http://openigs.org/2009/dbgui"
-         xmlns:gui="http://openigs.org/2009/gui"
          xmlns:sg="http://openigs.org/2009/sg">
 
   <igs:ConfigManager>
@@ -118,49 +116,5 @@
       </children>
     </Children>
   </sg:Scene>
-
-  <gui:Container name="GraphicsWindowContainer">
-    <Visible>
-      <visible>true</visible>
-    </Visible>
-  </gui:Container>
-
-  <gui:DockWindow name="OpenIGSLogWindowDockWindow">
-    <Visible>
-      <visible>false</visible>
-    </Visible>
-  </gui:DockWindow>
-  <gui:DockWindow name="OpenIGSScriptEditorDockWindow">
-    <Visible>
-      <visible>false</visible>
-    </Visible>
-  </gui:DockWindow>
-
-  <dbgui:PropertyEditor name="OpenIGSPropertyEditor">
-    <Module>
-      <module>
-        <sg:ParametricNode name="ParametricNode"/>
-      </module>
-    </Module>
-    <Interactive>
-      <interactive>true</interactive>
-    </Interactive>
-    <Module>
-      <module>
-        <sg:Shader name="ParametricVertexShader"/>
-      </module>
-    </Module>
-    <Interactive>
-      <interactive>true</interactive>
-    </Interactive>
-    <Module>
-      <module>
-        <sg:Camera name="Default"/>
-      </module>
-    </Module>
-    <Interactive>
-      <interactive>true</interactive>
-    </Interactive>
-  </dbgui:PropertyEditor>
 
 </openigs>

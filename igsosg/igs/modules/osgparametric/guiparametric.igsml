@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openigs xmlns:igs="http://openigs.org/2009/igs"
+         xmlns:dbgui="http://openigs.org/2009/dbgui"
+         xmlns:gui="http://openigs.org/2009/gui"
+         xmlns:sg="http://openigs.org/2009/sg">
+  <gui:Window name="ParametricWindow">
+    <TitleText>
+      <titleText>Parametric Demo</titleText>
+    </TitleText>
+    <Layout>
+      <layout>
+        <gui:GridLayout name="ParametricRootLayout" />
+      </layout>
+    </Layout>
+    <Children>
+      <children>
+        <gui:TabbedContainer name="ParametricTabContainer">
+          <Children>
+            <children>
+              <gui:Frame name="ParametricEnvironmentFrame">
+                <TitleText>
+                  <titleText>Environment</titleText>
+                </TitleText>
+                <Layout>
+                  <layout>
+                    <gui:GridLayout name="ParametricEnvironmentRootLayout" />
+                  </layout>
+                </Layout>
+                <Children>
+                  <children>
+                    <gui:Label>
+                      <Text>
+                        <text>Camera Draw Mode</text>
+                      </Text>
+                    </gui:Label>
+                    <gui:ComboBox name="ParametricEnvironmentCameraDrawMode">
+                      <Items>
+                        <items>Normal,Lines,Points</items>
+                      </Items>
+                    </gui:ComboBox>
+                    <gui:Label>
+                      <Text>
+                        <text>Model Filename</text>
+                      </Text>
+                    </gui:Label>
+                    <gui:TextField name="ParametricEnvironmentModelFilename">
+                      <Text>
+                        <text>$OPENIGS_ROOT/share/openigs/examples/osg/parametric/lens.ive</text>
+                      </Text>
+                    </gui:TextField>
+                    <gui:Label>
+                      <Text>
+                        <text>Model Visible</text>
+                      </Text>
+                    </gui:Label>
+                    <gui:CheckBox name="ParametricEnvironmentModelVisible">
+                      <Checked>
+                        <checked>true</checked>
+                      </Checked>
+                    </gui:CheckBox>
+                    <gui:Label>
+                      <Text>
+                        <text>Axes Visible</text>
+                      </Text>
+                    </gui:Label>
+                    <gui:CheckBox name="ParametricEnvironmentAxesVisible" />
+                  </children>
+                </Children>
+              </gui:Frame>
+              <gui:Frame name="ParametricDisplayFrame">
+                <TitleText>
+                  <titleText>Parametric Display</titleText>
+                </TitleText>
+                <Layout>
+                  <layout>
+                    <gui:LinearLayout name="ParametricDisplayRootLayout">
+                      <Direction>
+                        <direction>TopToBottom</direction>
+                      </Direction>
+                    </gui:LinearLayout>
+                  </layout>
+                </Layout>
+                <Children>
+                  <children>
+                    <gui:CheckBox name="ParametricDisplayTop">
+                      <Text>
+                        <text>Top</text>
+                      </Text>
+                      <Checked>
+                        <checked>true</checked>
+                      </Checked>
+                    </gui:CheckBox>
+                    <gui:CheckBox name="ParametricDisplayWalls">
+                      <Text>
+                        <text>Walls</text>
+                      </Text>
+                      <Checked>
+                        <checked>true</checked>
+                      </Checked>
+                    </gui:CheckBox>
+                    <gui:CheckBox name="ParametricDisplayBottom">
+                      <Text>
+                        <text>Bottom</text>
+                      </Text>
+                      <Checked>
+                        <checked>true</checked>
+                      </Checked>
+                    </gui:CheckBox>
+                  </children>
+                </Children>
+              </gui:Frame>
+              <gui:Frame name="ParametricGeometryFrame">
+                <TitleText>
+                  <titleText>Geometry</titleText>
+                </TitleText>
+                <Layout>
+                  <layout>
+                    <gui:GridLayout />
+                  </layout>
+                </Layout>
+                <Children>
+                  <children>
+                    <gui:Label>
+                      <Text>
+                        <text>Cells</text>
+                      </Text>
+                    </gui:Label>
+                    <gui:TextField name="ParametricGeometryCells">
+                      <Text>
+                        <text parse=false>25, 25</text>
+                      </Text>
+                    </gui:TextField>
+                    <gui:Label>
+                      <Text>
+                        <text>Top Function</text>
+                      </Text>
+                    </gui:Label>
+                    <gui:TextField name="ParametricGeometryTopFunction">
+                      <Text>
+                        <text>((x-x*x)*(y-y*y)*5.0+0.2*sin(osg_SimulationTime))</text>
+                      </Text>
+                    </gui:TextField>
+                    <gui:Label>
+                      <Text>
+                        <text>Bottom Function</text>
+                      </Text>
+                    </gui:Label>
+                    <gui:TextField name="ParametricGeometryBottomFunction">
+                      <Text>
+                        <text>(-0.1*sin(x*y*6.28+osg_SimulationTime))</text>
+                      </Text>
+                    </gui:TextField>
+                  </children>
+                </Children>
+              </gui:Frame>
+            </children>
+          </Children>
+        </gui:TabbedContainer>
+      </children>
+    </Children>
+    <Visible>
+      <visible>true</visible>
+    </Visible>
+  </gui:Window>
+
+  <gui:Container name="GraphicsWindowContainer">
+    <Visible>
+      <visible>true</visible>
+    </Visible>
+  </gui:Container>
+
+  <gui:DockWindow name="OpenIGSLogWindowDockWindow">
+    <Visible>
+      <visible>false</visible>
+    </Visible>
+  </gui:DockWindow>
+  <gui:DockWindow name="OpenIGSScriptEditorDockWindow">
+    <Visible>
+      <visible>false</visible>
+    </Visible>
+  </gui:DockWindow>
+
+  <dbgui:PropertyEditor name="OpenIGSPropertyEditor">
+    <Module>
+      <module>
+        <sg:ParametricNode name="ParametricNode"/>
+      </module>
+    </Module>
+    <Interactive>
+      <interactive>true</interactive>
+    </Interactive>
+    <Module>
+      <module>
+        <sg:Shader name="ParametricVertexShader"/>
+      </module>
+    </Module>
+    <Interactive>
+      <interactive>true</interactive>
+    </Interactive>
+    <Module>
+      <module>
+        <sg:Camera name="Default"/>
+      </module>
+    </Module>
+    <Interactive>
+      <interactive>true</interactive>
+    </Interactive>
+  </dbgui:PropertyEditor>
+</openigs>

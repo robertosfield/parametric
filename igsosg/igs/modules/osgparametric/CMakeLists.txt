@@ -44,7 +44,9 @@ install(
         ${CMAKE_SOURCE_DIR}/src/osgParametric/parametric3.vert
         ${CMAKE_SOURCE_DIR}/src/osgParametric/parametric.frag
         ${CMAKE_SOURCE_DIR}/README.md
+        guiparametric.igsml
         osgparametric.igsml
+        parametric.igsml
     DESTINATION
        share/openigs/examples/osg/parametric
 )
