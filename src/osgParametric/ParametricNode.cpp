@@ -6,6 +6,7 @@
 #include "ParametricNode.h"
 
 #include <osg/Geometry>
+#include <osg/ShapeDrawable> // TEMP
 
 #include <sstream>
 
@@ -302,7 +303,9 @@ void ParametricNode::setup()
 
     _parametricScene->addSubgraph(parametric_group, true, true);
 
+
     for (auto subgraph : _subgraphs) {
+//      _parametricScene->addSubgraph(new osg::ShapeDrawable(new osg::Cylinder(osg::Vec3(0.5,0.5,0.5), 0.4, 20.0)), visibleBoundaries, depthBoundaries);
       _parametricScene->addSubgraph(subgraph, visibleBoundaries, depthBoundaries);
     }
 
