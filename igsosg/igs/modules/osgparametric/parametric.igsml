@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openigs xmlns:igs="http://openigs.org/2009/igs"
+         xmlns:sg="http://openigs.org/2009/sg">
+
+  <igs:ConfigManager>
+    <Urls>
+      <urls>
+        $OPENIGS_ROOT/share/openigs/examples/osg/parametric/osgparametric.igsml,
+        $OPENIGS_ROOT/share/openigs/examples/osg/parametric/guiparametric.igsml
+      </urls>
+    </Urls>
+  </igs:ConfigManager>
+
+</openigs>
