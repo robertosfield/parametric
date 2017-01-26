@@ -8,7 +8,8 @@
     <Urls>
       <urls>
         $OPENIGS_ROOT/share/openigs/configs/gui/gui-workspacegraphicsparent.igsml,
-        $OPENIGS_ROOT/share/openigs/configs/sg/sg-graphicswindow.igsml
+        $OPENIGS_ROOT/share/openigs/configs/sg/sg-graphicswindow.igsml,
+        $OPENIGS_ROOT/share/openigs/configs/sg/sg-cameraorientationaxes.igsml
       </urls>
     </Urls>
   </igs:ConfigManager>
@@ -22,6 +23,11 @@
   <sg:Scene name="Default">
     <Children>
       <children>
+        <sg:Axes name="Origin">
+          <Visible>
+            <visible>false</visible>
+          </Visible>
+        </sg:Axes>
         <sg:ParametricNode name="ParametricNode">
           <GraphicsState>
             <graphicsState>
@@ -69,12 +75,32 @@
             <renderTop>true</renderTop>
           </RenderTop>
           <VisibleBoundaries>
-            <visibleBoundaries>true</visibleBoundaries>
+            <visibleBoundaries>false</visibleBoundaries>
           </VisibleBoundaries>
+          <DepthBoundaries>
+            <depthBoundaries>false</depthBoundaries>
+          </DepthBoundaries>
           <NumCells>
             <uCells>25</uCells>
             <vCells>25</vCells>
           </NumCells>
+          <Subgraphs>
+            <subgraphs>
+              <sg:Transform name="ParametricBoundaryTransform">
+                <Children>
+                  <children>
+                    <sg:Cylinder name="ParametricBoundaryShape"/>
+                  </children>
+                </Children>
+                <Translation>
+                  <translation>0.5, 0.5, 0.0</translation>
+                </Translation>
+                <Scale>
+                  <scale>0.4, 0.4, 20.0</scale>
+                </Scale>
+              </sg:Transform>
+            </subgraphs>
+          </Subgraphs>
           <Setup/>
         </sg:ParametricNode>
       </children>
