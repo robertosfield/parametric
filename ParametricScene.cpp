@@ -285,7 +285,5 @@ REGISTER_OBJECT_WRAPPER( ParametricScene,
 {
     ADD_UINT_SERIALIZER( Width, 0 );
     ADD_UINT_SERIALIZER( Height, 0 );
-//    ADD_OBJECT_SERIALIZER( Settings, osgParametric::Settings, NULL );
-//    ADD_VECTOR_SERIALIZER( Roads, osgParametric::RoadNetwork::Roads, osgDB::BaseSerializer::RW_OBJECT, 0 );
 }
 
