@@ -28,6 +28,18 @@
             <visible>false</visible>
           </Visible>
         </sg:Axes>
+        <sg:Model name="Lens">
+          <Filename>
+            <filename>$OPENIGS_ROOT/share/openigs/examples/osg/parametric/lens.ive</filename>
+          </Filename>
+          <Translation>
+            <translation>0.5, 0.5, -4.0</translation>
+          </Translation>
+          <UniformScale>
+            <uniformScale>0.01</uniformScale>
+          </UniformScale>
+          <Load/>
+        </sg:Model>
         <sg:ParametricNode name="ParametricNode">
           <GraphicsState>
             <graphicsState>
