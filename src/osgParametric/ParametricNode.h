@@ -9,8 +9,13 @@
 
 #include <osg/Group>
 
+#include <vector>
+
 namespace osgParametric
 {
+
+using NodePtr = osg::ref_ptr<osg::Node>;
+using NodeVec = std::vector<NodePtr>;
 
 class OSGPARAMETRIC_EXPORT ParametricNode : public osg::Group
 {
@@ -42,7 +47,9 @@ public:
     std::string zBase;
     std::string zTop;
 
-    void addSubgraph(osg::ref_ptr<osg::Node> const & subgraph);
+    void addSubgraphs(NodeVec const & subgraphs);
+    void addSubgraph(NodePtr const & subgraph);
+    NodeVec const & getSubgraphs() const { return _subgraphs; }
 
     void setup();
 
@@ -54,6 +61,7 @@ protected:
 
     osg::ref_ptr<ParametricScene> _parametricScene;
 
+    NodeVec _subgraphs;
 };
 
 }

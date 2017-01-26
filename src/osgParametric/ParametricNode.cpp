@@ -41,9 +41,16 @@ void ParametricNode::getDimensions(unsigned int & w, unsigned int & h) const
     h = _parametricScene->getHeight();
 }
 
-void ParametricNode::addSubgraph(osg::ref_ptr<osg::Node> const & subgraph)
+void ParametricNode::addSubgraphs(NodeVec const & subgraphs)
 {
-    _parametricScene->addSubgraph(subgraph.get(), visibleBoundaries, depthBoundaries);
+    for (auto subgraph : subgraphs) {
+       addSubgraph(subgraph);
+    }
+}
+
+void ParametricNode::addSubgraph(NodePtr const & subgraph)
+{
+    _subgraphs.push_back(subgraph);
 }
 
 void ParametricNode::init()
