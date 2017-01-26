@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openigs xmlns:igs="http://openigs.org/2009/igs"
+         xmlns:dbgui="http://openigs.org/2009/dbgui"
+         xmlns:gui="http://openigs.org/2009/gui"
          xmlns:sg="http://openigs.org/2009/sg">
 
   <igs:ConfigManager>
@@ -70,12 +72,40 @@
             <visibleBoundaries>true</visibleBoundaries>
           </VisibleBoundaries>
           <NumCells>
-            <uCells>1000</uCells>
-            <vCells>1000</vCells>
+            <uCells>25</uCells>
+            <vCells>25</vCells>
           </NumCells>
           <Setup/>
         </sg:ParametricNode>
       </children>
     </Children>
   </sg:Scene>
+
+  <gui:Container name="GraphicsWindowContainer">
+    <Visible>
+      <visible>true</visible>
+    </Visible>
+  </gui:Container>
+<!--
+  <gui:DockWindow name="OpenIGSLogWindowDockWindow">
+    <Visible>
+      <visible>false</visible>
+    </Visible>
+  </gui:DockWindow>
+  <gui:DockWindow name="OpenIGSScriptEditorWindowDockWindow">
+    <Visible>
+      <visible>false</visible>
+    </Visible>
+  </gui:DockWindow>
+-->
+  <dbgui:PropertyEditor name="OpenIGSPropertyEditor">
+    <Interactive>
+      <interactive>true</interactive>
+    </Interactive>
+    <Module>
+      <module>
+        <sg:Shader name="ParametricVertexShader"/>
+      </module>
+    </Module>
+  </dbgui:PropertyEditor>
 </openigs>
