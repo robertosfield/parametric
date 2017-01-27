@@ -10,6 +10,24 @@
 // ParametricNode Module definitions
 // ----------------------------------------------------------------------------
 
+namespace osgParametric {
+
+sg::Vec2 getNumCells(ParametricNode const * pn)
+{
+  sg::Vec2 numCells;
+  numCells[0] = static_cast<float>(pn->uCells);
+  numCells[1] = static_cast<float>(pn->vCells);
+  return numCells;
+}
+
+void setNumCells(ParametricNode * pn, sg::Vec2 const & numCells)
+{
+  pn->uCells = std::max(10u, std::min(1000u, static_cast<unsigned int>(numCells[0])));
+  pn->vCells = std::max(10u, std::min(1000u, static_cast<unsigned int>(numCells[1])));
+}
+
+} // namespace osgParametric
+
 namespace igs {
 
 template <>
@@ -36,13 +54,11 @@ classInfo<osgParametric::ParametricNode>()
 
       .addProperty(
           Property( "NumCells", Property::Persistent,
-              Method("getNumCells", &osgParametric::ParametricNode::getNumCells,
-                  Parameter("uCells", 10, Parameter::Out),
-                  Parameter("vCells", 10, Parameter::Out)
+              BoundFunction("getNumCells", &osgParametric::getNumCells,
+                  Return("numCells", igs::math::vec<sg::Vec2>(25.0, 25.0), Return::Out)
               ),
-              Method( "setNumCells", &osgParametric::ParametricNode::setNumCells,
-                  Parameter("uCells", 10, Parameter::In),
-                  Parameter("vCells", 10, Parameter::In)
+              BoundFunction( "setNumCells", &osgParametric::setNumCells,
+                  Parameter("numCells", igs::math::vec<sg::Vec2>(25.0, 25.0), Parameter::In)
               ),
               Signal()
           )

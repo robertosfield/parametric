@@ -109,8 +109,7 @@
             <depthBoundaries>false</depthBoundaries>
           </DepthBoundaries>
           <NumCells>
-            <uCells>25</uCells>
-            <vCells>25</vCells>
+            <numCells>25, 25</numCells>
           </NumCells>
           <Subgraphs>
             <subgraphs>

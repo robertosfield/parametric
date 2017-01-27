@@ -31,8 +31,9 @@ public:
     void setDimensions(unsigned int w, unsigned int h);
     void getDimensions(unsigned int & w, unsigned int & h) const { w = _width; h = _height; }
 
-    void setNumCells(unsigned int uc, unsigned int vc) { uCells = uc; vCells = vc; }
-    void getNumCells(unsigned int & uc, unsigned int & vc) const { uc = uCells; vc = vCells; }
+    void setNumCells(osg::Vec2 const & numCells) { uCells = static_cast<unsigned int>(numCells[0]);
+                                                   vCells = static_cast<unsigned int>(numCells[1]); }
+    osg::Vec2 getNumCells() const { return osg::Vec2(static_cast<float>(uCells), static_cast<float>(vCells)); }
     unsigned int uCells    = 10;
     unsigned int vCells    = 10;
 
