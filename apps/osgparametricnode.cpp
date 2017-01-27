@@ -17,35 +17,13 @@
 
 #include <osgParametric/ParametricNode.h>
 
-osg::ref_ptr<osg::Program> createProgram(osg::ArgumentParser& arguments)
-{
-    osg::ref_ptr<osg::Program> program = new osg::Program;
-
-    std::string filename;
-    typedef std::map<osg::Shader::Type, osg::ref_ptr<osg::Shader> > ShaderMap;
-    ShaderMap shaders;
-
-    while(arguments.read("--shader",filename))
-    {
-        osg::ref_ptr<osg::Shader> shader = osgDB::readRefShaderFile(filename);
-        if (shader.valid())
-        {
-            shaders[shader->getType()] = shader;
-        }
-    }
-
-    for(ShaderMap::iterator itr = shaders.begin();
-        itr != shaders.end();
-        ++itr)
-    {
-        program->addShader(itr->second);
-    }
-
-    return program;
-}
-
 void setupParametric(osg::ArgumentParser& arguments, osgParametric::ParametricNode & pn)
 {
+    std::string shader;
+    std::vector<std::string> shaders;
+    while(arguments.read("--shader", shader)) shaders.push_back(shader);
+    pn.addShaders(shaders);
+
     while (arguments.read("--columns", pn.uCells)) {}
     while (arguments.read("--rows", pn.vCells)) {}
 
@@ -54,9 +32,15 @@ void setupParametric(osg::ArgumentParser& arguments, osgParametric::ParametricNo
     while (arguments.read("--walls")) pn.renderSidewalls=true;
     while (arguments.read("--all")) { pn.renderBase = true; pn.renderTop = true; pn.renderSidewalls = true; }
 
-    while(arguments.read("--Z_FUNCTION", pn.zFunction));
-    while(arguments.read("--Z_BASE", pn.zBase));
-    while(arguments.read("--Z_TOP", pn.zTop));
+    std::string function;
+    while(arguments.read("--Z_FUNCTION", function)) pn.setZFunction(function);
+    while(arguments.read("--Z_BASE", function)) pn.setZBase(function);
+    while(arguments.read("--Z_TOP", function)) pn.setZTop(function);
+
+    while(arguments.read("-b")) pn.visibleBoundaries = true;
+
+    bool depthBoundaries = false;
+    while(arguments.read("-d")) pn.depthBoundaries = true;
 
     std::string name;
     float value;
@@ -86,24 +70,14 @@ int main(int argc, char** argv)
         return 0;
     }
 
-
     osg::ref_ptr<osgParametric::ParametricNode> ps = new osgParametric::ParametricNode;
 
     // provide the ParametricScene node with the dimensions of the window so it can correctly size the textures
     const osg::GraphicsContext::Traits* traits = windows.front()->getTraits();
     ps->setDimensions(traits->width, traits->height);
 
-    // aset up the shaders to do the parametric surface placement and depth textures
-    ps->getOrCreateStateSet()->setAttribute(createProgram(arguments));
-
-
     // assign the parametric surface
     setupParametric(arguments, *ps);
-
-    while(arguments.read("-b")) ps->visibleBoundaries = true;
-
-    bool depthBoundaries = false;
-    while(arguments.read("-d")) ps->depthBoundaries = true;
 
     osg::Vec3 center;
     osg::Vec3 dimensions;

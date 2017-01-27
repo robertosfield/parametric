@@ -126,10 +126,10 @@ classInfo<osgParametric::ParametricNode>()
 
       .addProperty(
           Property( "ZFunction", Property::Persistent,
-              Member("getZFunction", &osgParametric::ParametricNode::zFunction,
+              Method("getZFunction", &osgParametric::ParametricNode::getZFunction,
                   Return("zFunction", std::string(), Return::Out)
               ),
-              Member("setZFunction", &osgParametric::ParametricNode::zFunction,
+              Method("setZFunction", &osgParametric::ParametricNode::setZFunction,
                   Parameter("zFunction", std::string(), Parameter::In)
               ),
               Signal()
@@ -138,10 +138,10 @@ classInfo<osgParametric::ParametricNode>()
 
       .addProperty(
           Property( "ZBase", Property::Persistent,
-              Member("getZBase", &osgParametric::ParametricNode::zBase,
+              Method("getZBase", &osgParametric::ParametricNode::getZBase,
                   Return("zBase", std::string(), Return::Out)
               ),
-              Member("setZBase", &osgParametric::ParametricNode::zBase,
+              Method("setZBase", &osgParametric::ParametricNode::setZBase,
                   Parameter("zBase", std::string(), Parameter::In)
               ),
               Signal()
@@ -150,11 +150,21 @@ classInfo<osgParametric::ParametricNode>()
 
       .addProperty(
           Property( "ZTop", Property::Persistent,
-              Member("getZTope", &osgParametric::ParametricNode::zTop,
+              Method("getZTope", &osgParametric::ParametricNode::getZTop,
                   Return("zTop", std::string(), Return::Out)
               ),
-              Member("setZTop", &osgParametric::ParametricNode::zTop,
+              Method("setZTop", &osgParametric::ParametricNode::setZTop,
                   Parameter("zTop", std::string(), Parameter::In)
+              ),
+              Signal()
+          )
+      )
+
+      .addProperty(
+          Property( "Shaders", Property::Persistent,
+              Operation(),
+              Method("addShaders", &osgParametric::ParametricNode::addShaders,
+                  Parameter("shaders", std::vector<std::string>(), Parameter::In)
               ),
               Signal()
           )

@@ -7,10 +7,34 @@
 
 #include <osg/Geometry>
 #include <osg/ShapeDrawable> // TEMP
+#include <osgDB/ReadFile>
 
 #include <sstream>
 
 using namespace osgParametric;
+
+int
+replaceAll( std::string       & source,
+            std::string const & oldPart,
+            std::string const & newPart )
+{
+  std::size_t oldSize = oldPart.size();
+  std::size_t newSize = newPart.size();
+  std::size_t pos     = 0;
+  int         num     = 0;
+
+  while ( pos < source.size() ) { // cannot save source size because it may change
+    pos = source.find( oldPart, pos );
+
+    if ( pos != std::string::npos ) {
+      source.replace( pos, oldSize, newPart );
+      pos += newSize;
+      ++num;
+    }
+  }
+  return num;
+} // replaceAll
+
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -35,6 +59,45 @@ void ParametricNode::setDimensions(unsigned int w, unsigned int h)
 {
     _width = w;
     _height = h;
+}
+
+void ParametricNode::setZFunction(std::string const & zFunction)
+{
+    if (zFunction == _zFunction) {
+      return;
+    }
+    _zFunction = zFunction;
+    updateShaders();
+}
+
+void ParametricNode::setZBase(std::string const & zBase)
+{
+    if (zBase == _zBase) {
+      return;
+    }
+    _zBase = zBase;
+    updateShaders();
+}
+
+void ParametricNode::setZTop(std::string const & zTop)
+{
+    if (zTop == _zTop) {
+      return;
+    }
+    _zTop = zTop;
+    updateShaders();
+}
+
+void ParametricNode::addShaders(StringVec const & shadersFilenames)
+{
+    for (auto shaderFilename : shadersFilenames) {
+      ShaderPtr shader = osgDB::readRefShaderFile(shaderFilename);
+      if (shader.valid()) {
+        _shaderSources[shader->getType()] = shader->getShaderSource();
+      }
+    }
+
+    updateShaders();
 }
 
 void ParametricNode::addSubgraphs(NodeVec const & subgraphs)
@@ -296,17 +359,17 @@ void ParametricNode::setup()
     }
 
     std::string function;
-    if (!zFunction.empty()) { parametric_group->getOrCreateStateSet()->setDefine("Z_FUNCTION", zFunction); }
-    if (!zBase.empty()) { parametric_group->getOrCreateStateSet()->setDefine("Z_BASE", zBase); }
-    if (!zTop.empty()) { parametric_group->getOrCreateStateSet()->setDefine("Z_TOP", zTop); }
+    if (!_zFunction.empty()) { parametric_group->getOrCreateStateSet()->setDefine("Z_FUNCTION", _zFunction); }
+    if (!_zBase.empty()) { parametric_group->getOrCreateStateSet()->setDefine("Z_BASE", _zBase); }
+    if (!_zTop.empty()) { parametric_group->getOrCreateStateSet()->setDefine("Z_TOP", _zTop); }
 
     removeChildren(0, getNumChildren());
 
     _parametricScene = new ParametricScene;
     _parametricScene->setDimensions(_width, _height);
+    updateShaders();
 
     _parametricScene->addSubgraph(parametric_group, true, true);
-
 
     for (auto subgraph : _subgraphs) {
 //      _parametricScene->addSubgraph(new osg::ShapeDrawable(new osg::Cylinder(osg::Vec3(0.5,0.5,0.5), 0.4, 20.0)), visibleBoundaries, depthBoundaries);
@@ -316,4 +379,36 @@ void ParametricNode::setup()
     _parametricScene->setup();
     addChild(_parametricScene);
 
+}
+
+void ParametricNode::updateShaders()
+{
+    if (!_parametricScene.valid()) {
+      return;
+    }
+
+    osg::ref_ptr<osg::Program> program = new osg::Program;
+
+    // Add all the shaders, replacing the function strings found
+    for (ShaderSourceMap::const_iterator ssmit = _shaderSources.begin();
+         ssmit != _shaderSources.end(); ++ssmit) {
+       auto type = ssmit->first;
+       std::string source = ssmit->second;
+
+       if (!_zFunction.empty()) {
+         replaceAll(source, "INSERT_ZFUNCTION", _zFunction);
+       }
+       if (!_zBase.empty()) {
+         replaceAll(source, "INSERT_ZBASE", _zBase);
+       }
+       if (!_zTop.empty()) {
+         replaceAll(source, "INSERT_ZTOP", _zTop);
+       }
+
+       if (!source.empty()) {
+         program->addShader(new osg::Shader(type, source));
+       }
+    }
+
+    _parametricScene->getOrCreateStateSet()->setAttribute(program);
 }

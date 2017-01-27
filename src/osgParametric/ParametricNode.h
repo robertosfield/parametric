@@ -8,7 +8,11 @@
 #include <osgParametric/ParametricScene.h>
 
 #include <osg/Group>
+#include <osg/Program>
+#include <osg/Shader>
 
+#include <map>
+#include <string>
 #include <vector>
 
 namespace osgParametric
@@ -16,6 +20,12 @@ namespace osgParametric
 
 using NodePtr = osg::ref_ptr<osg::Node>;
 using NodeVec = std::vector<NodePtr>;
+
+using ShaderPtr = osg::ref_ptr<osg::Shader>;
+using ShaderMap = std::map<osg::Shader::Type, ShaderPtr>;
+using ShaderSourceMap = std::map<osg::Shader::Type, std::string>;
+
+using StringVec = std::vector<std::string>;
 
 class OSGPARAMETRIC_EXPORT ParametricNode : public osg::Group
 {
@@ -44,9 +54,16 @@ public:
     bool visibleBoundaries = false;
     bool depthBoundaries   = false;
 
-    std::string zFunction;
-    std::string zBase;
-    std::string zTop;
+    void setZFunction(std::string const & zFunction);
+    std::string const & getZFunction() const { return _zFunction; }
+
+    void setZBase(std::string const & zBase);
+    std::string const & getZBase() const { return _zBase; }
+
+    void setZTop(std::string const & zTop);
+    std::string const & getZTop() const { return _zTop; }
+
+    void addShaders(StringVec const & shaders);
 
     void addSubgraphs(NodeVec const & subgraphs);
     void addSubgraph(NodePtr const & subgraph);
@@ -64,6 +81,14 @@ protected:
 
     unsigned int _width = 800;
     unsigned int _height = 600;
+
+    void updateShaders();
+    std::string _zFunction;
+    std::string _zBase;
+    std::string _zTop;
+
+    ShaderSourceMap _shaderSources;
+
     NodeVec _subgraphs;
 };
 
