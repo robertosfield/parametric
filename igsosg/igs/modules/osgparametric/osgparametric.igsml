@@ -68,6 +68,24 @@
                     </sg:Program>
                   </attributes>
                 </Attributes>
+                <Uniforms>
+                  <uniforms>
+                    <sg:Uniform name="ParametricOpacity">
+                      <UniformName>
+                        <uniformName>opacity</uniformName>
+                      </UniformName>
+                      <Type>
+                        <type>float</type>
+                      </Type>
+                      <NumElements>
+                        <numElements>1</numElements>
+                      </NumElements>
+                      <Value>
+                        <value>0.5</value>
+                      </Value>
+                    </sg:Uniform>
+                  </uniforms>
+                </Uniforms>
               </sg:GraphicsState>
             </graphicsState>
           </GraphicsState>

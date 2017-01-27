@@ -5,6 +5,7 @@
 #endif
 
 uniform float cutOff;
+uniform float opacity;
 
 varying vec4 color;
 varying vec4 v;
@@ -62,5 +63,5 @@ void main(void)
         if (outside(texcoord, depth, backDepthTexture3, frontDepthTexture3)) discard;
     #endif
 #endif
-    gl_FragColor = color;
+    gl_FragColor = vec4(color.rgb, opacity);
 }

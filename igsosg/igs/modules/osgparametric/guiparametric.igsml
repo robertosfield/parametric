@@ -1,8 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<openigs xmlns:igs="http://openigs.org/2009/igs"
-         xmlns:dbgui="http://openigs.org/2009/dbgui"
-         xmlns:gui="http://openigs.org/2009/gui"
-         xmlns:sg="http://openigs.org/2009/sg">
+<openigs>
   <gui:Window name="ParametricWindow">
     <TitleText>
       <titleText>Parametric Demo</titleText>
@@ -37,6 +33,21 @@
                       <Items>
                         <items>Normal,Lines,Points</items>
                       </Items>
+                      <Links>
+                        <signalProperty>Selection</signalProperty>
+                        <targets>
+                          <igs:LinkTarget>
+                            <Target>
+                              <target>
+                                <sg:Camera name="Default" />
+                              </target>
+                            </Target>
+                            <TargetProperty>
+                              <targetProperty>DrawMode</targetProperty>
+                            </TargetProperty>
+                          </igs:LinkTarget>
+                        </targets>
+                      </Links>
                     </gui:ComboBox>
                     <gui:Label>
                       <Text>
@@ -47,6 +58,31 @@
                       <Text>
                         <text>$OPENIGS_ROOT/share/openigs/examples/osg/parametric/lens.ive</text>
                       </Text>
+                      <Links>
+                        <signalProperty>EditingFinished</signalProperty>
+                        <targets>
+                          <igs:LinkTarget>
+                            <Target>
+                              <target>
+                                <sg:Model name="Lens" />
+                              </target>
+                            </Target>
+                            <TargetProperty>
+                              <targetProperty>Filename</targetProperty>
+                            </TargetProperty>
+                          </igs:LinkTarget>
+                          <igs:LinkTarget>
+                            <Target>
+                              <target>
+                                <sg:Model name="Lens" />
+                              </target>
+                            </Target>
+                            <TargetProperty>
+                              <targetProperty>Load</targetProperty>
+                            </TargetProperty>
+                          </igs:LinkTarget>
+                        </targets>
+                      </Links>
                     </gui:TextField>
                     <gui:Label>
                       <Text>
@@ -57,13 +93,44 @@
                       <Checked>
                         <checked>true</checked>
                       </Checked>
+                      <Links>
+                        <signalProperty>Checked</signalProperty>
+                        <targets>
+                          <igs:LinkTarget>
+                            <Target>
+                              <target>
+                                <sg:Model name="Lens" />
+                              </target>
+                            </Target>
+                            <TargetProperty>
+                              <targetProperty>Visible</targetProperty>
+                            </TargetProperty>
+                          </igs:LinkTarget>
+                        </targets>
+                      </Links>
                     </gui:CheckBox>
                     <gui:Label>
                       <Text>
                         <text>Axes Visible</text>
                       </Text>
                     </gui:Label>
-                    <gui:CheckBox name="ParametricEnvironmentAxesVisible" />
+                    <gui:CheckBox name="ParametricEnvironmentAxesVisible">
+                      <Links>
+                        <signalProperty>Checked</signalProperty>
+                        <targets>
+                          <igs:LinkTarget>
+                            <Target>
+                              <target>
+                                <sg:Axes name="Origin" />
+                              </target>
+                            </Target>
+                            <TargetProperty>
+                              <targetProperty>Visible</targetProperty>
+                            </TargetProperty>
+                          </igs:LinkTarget>
+                        </targets>
+                      </Links>
+                    </gui:CheckBox>
                   </children>
                 </Children>
               </gui:Frame>
@@ -89,6 +156,31 @@
                       <Checked>
                         <checked>true</checked>
                       </Checked>
+                      <Links>
+                        <signalProperty>Checked</signalProperty>
+                        <targets>
+                          <igs:LinkTarget>
+                            <Target>
+                              <target>
+                                <sg:ParametricNode name="ParametricNode" />
+                              </target>
+                            </Target>
+                            <TargetProperty>
+                              <targetProperty>RenderTop</targetProperty>
+                            </TargetProperty>
+                          </igs:LinkTarget>
+                          <igs:LinkTarget>
+                            <Target>
+                              <target>
+                                <sg:ParametricNode name="ParametricNode" />
+                              </target>
+                            </Target>
+                            <TargetProperty>
+                              <targetProperty>Setup</targetProperty>
+                            </TargetProperty>
+                          </igs:LinkTarget>
+                        </targets>
+                      </Links>
                     </gui:CheckBox>
                     <gui:CheckBox name="ParametricDisplayWalls">
                       <Text>
@@ -97,6 +189,31 @@
                       <Checked>
                         <checked>true</checked>
                       </Checked>
+                      <Links>
+                        <signalProperty>Checked</signalProperty>
+                        <targets>
+                          <igs:LinkTarget>
+                            <Target>
+                              <target>
+                                <sg:ParametricNode name="ParametricNode" />
+                              </target>
+                            </Target>
+                            <TargetProperty>
+                              <targetProperty>RenderSidewalls</targetProperty>
+                            </TargetProperty>
+                          </igs:LinkTarget>
+                          <igs:LinkTarget>
+                            <Target>
+                              <target>
+                                <sg:ParametricNode name="ParametricNode" />
+                              </target>
+                            </Target>
+                            <TargetProperty>
+                              <targetProperty>Setup</targetProperty>
+                            </TargetProperty>
+                          </igs:LinkTarget>
+                        </targets>
+                      </Links>
                     </gui:CheckBox>
                     <gui:CheckBox name="ParametricDisplayBottom">
                       <Text>
@@ -105,7 +222,70 @@
                       <Checked>
                         <checked>true</checked>
                       </Checked>
+                      <Links>
+                        <signalProperty>Checked</signalProperty>
+                        <targets>
+                          <igs:LinkTarget>
+                            <Target>
+                              <target>
+                                <sg:ParametricNode name="ParametricNode" />
+                              </target>
+                            </Target>
+                            <TargetProperty>
+                              <targetProperty>RenderBase</targetProperty>
+                            </TargetProperty>
+                          </igs:LinkTarget>
+                          <igs:LinkTarget>
+                            <Target>
+                              <target>
+                                <sg:ParametricNode name="ParametricNode" />
+                              </target>
+                            </Target>
+                            <TargetProperty>
+                              <targetProperty>Setup</targetProperty>
+                            </TargetProperty>
+                          </igs:LinkTarget>
+                        </targets>
+                      </Links>
                     </gui:CheckBox>
+                    <gui:Label>
+                      <Text>
+                        <text>Opacity</text>
+                      </Text>
+                    </gui:Label>
+                    <gui:Slider name="ParametricDisplayOpacity">
+                      <Range>
+                        <min>0</min>
+                        <max>1</max>
+                      </Range>
+                      <Increment>
+                        <increment>0.01</increment>
+                      </Increment>
+                      <Decimals>
+                        <decimals>2</decimals>
+                      </Decimals>
+                      <Value>
+                        <value>0.5</value>
+                      </Value>
+                      <Orientation>
+                        <orientation>Horizontal</orientation>
+                      </Orientation>
+                      <Links>
+                        <signalProperty>Value</signalProperty>
+                        <targets>
+                          <igs:LinkTarget>
+                            <Target>
+                              <target>
+                                <sg:Uniform name="ParametricOpacity" />
+                              </target>
+                            </Target>
+                            <TargetProperty>
+                              <targetProperty>Value</targetProperty>
+                            </TargetProperty>
+                          </igs:LinkTarget>
+                        </targets>
+                      </Links>
+                    </gui:Slider>
                   </children>
                 </Children>
               </gui:Frame>
@@ -127,8 +307,33 @@
                     </gui:Label>
                     <gui:TextField name="ParametricGeometryCells">
                       <Text>
-                        <text parse=false>25, 25</text>
+                        <text>25</text>
                       </Text>
+                      <Links>
+                        <signalProperty>EditingFinished</signalProperty>
+                        <targets>
+                          <igs:LinkTarget>
+                            <Target>
+                              <target>
+                                <sg:ParametricNode name="ParametricNode" />
+                              </target>
+                            </Target>
+                            <TargetProperty>
+                              <targetProperty>NumCells</targetProperty>
+                            </TargetProperty>
+                          </igs:LinkTarget>
+                          <igs:LinkTarget>
+                            <Target>
+                              <target>
+                                <sg:ParametricNode name="ParametricNode" />
+                              </target>
+                            </Target>
+                            <TargetProperty>
+                              <targetProperty>Setup</targetProperty>
+                            </TargetProperty>
+                          </igs:LinkTarget>
+                        </targets>
+                      </Links>
                     </gui:TextField>
                     <gui:Label>
                       <Text>
@@ -139,16 +344,66 @@
                       <Text>
                         <text>((x-x*x)*(y-y*y)*5.0+0.2*sin(osg_SimulationTime))</text>
                       </Text>
+                      <Links>
+                        <signalProperty>EditingFinished</signalProperty>
+                        <targets>
+                          <igs:LinkTarget>
+                            <Target>
+                              <target>
+                                <sg:ParametricNode name="ParametricNode" />
+                              </target>
+                            </Target>
+                            <TargetProperty>
+                              <targetProperty>ZTop</targetProperty>
+                            </TargetProperty>
+                          </igs:LinkTarget>
+                          <igs:LinkTarget>
+                            <Target>
+                              <target>
+                                <sg:ParametricNode name="ParametricNode" />
+                              </target>
+                            </Target>
+                            <TargetProperty>
+                              <targetProperty>Setup</targetProperty>
+                            </TargetProperty>
+                          </igs:LinkTarget>
+                        </targets>
+                      </Links>
                     </gui:TextField>
                     <gui:Label>
                       <Text>
                         <text>Bottom Function</text>
                       </Text>
                     </gui:Label>
-                    <gui:TextField name="ParametricGeometryBottomFunction">
+                    <gui:TextField name="ParametricGeometryBaseFunction">
                       <Text>
                         <text>(-0.1*sin(x*y*6.28+osg_SimulationTime))</text>
                       </Text>
+                      <Links>
+                        <signalProperty>EditingFinished</signalProperty>
+                        <targets>
+                          <igs:LinkTarget>
+                            <Target>
+                              <target>
+                                <sg:ParametricNode name="ParametricNode" />
+                              </target>
+                            </Target>
+                            <TargetProperty>
+                              <targetProperty>ZBase</targetProperty>
+                            </TargetProperty>
+                          </igs:LinkTarget>
+                          <igs:LinkTarget>
+                            <Target>
+                              <target>
+                                <sg:ParametricNode name="ParametricNode" />
+                              </target>
+                            </Target>
+                            <TargetProperty>
+                              <targetProperty>ZBase</targetProperty>
+                            </TargetProperty>
+                          </igs:LinkTarget>
+                        </targets>
+                      </Links>
                     </gui:TextField>
                   </children>
                 </Children>
@@ -162,13 +417,11 @@
       <visible>true</visible>
     </Visible>
   </gui:Window>
-
   <gui:Container name="GraphicsWindowContainer">
     <Visible>
       <visible>true</visible>
     </Visible>
   </gui:Container>
-
   <gui:DockWindow name="OpenIGSLogWindowDockWindow">
     <Visible>
       <visible>false</visible>
@@ -179,11 +432,10 @@
       <visible>false</visible>
     </Visible>
   </gui:DockWindow>
-
   <dbgui:PropertyEditor name="OpenIGSPropertyEditor">
     <Module>
       <module>
-        <sg:ParametricNode name="ParametricNode"/>
+        <sg:ParametricNode name="ParametricNode" />
       </module>
     </Module>
     <Interactive>
@@ -191,7 +443,7 @@
     </Interactive>
     <Module>
       <module>
-        <sg:Shader name="ParametricVertexShader"/>
+        <sg:Shader name="ParametricVertexShader" />
       </module>
     </Module>
     <Interactive>
@@ -199,7 +451,7 @@
     </Interactive>
     <Module>
       <module>
-        <sg:Camera name="Default"/>
+        <sg:Camera name="Default" />
       </module>
     </Module>
     <Interactive>
