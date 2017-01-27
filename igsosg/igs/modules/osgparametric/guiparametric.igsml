@@ -277,6 +277,72 @@
                         </targets>
                       </Links>
                     </gui:CheckBox>
+                    <gui:CheckBox name="ParametricDepthBoundaries">
+                      <Text>
+                        <text>Depth Boundaries</text>
+                      </Text>
+                      <Checked>
+                        <checked>false</checked>
+                      </Checked>
+                      <Links>
+                        <signalProperty>Checked</signalProperty>
+                        <targets>
+                          <igs:LinkTarget>
+                            <Target>
+                              <target>
+                                <sg:ParametricNode name="ParametricNode" />
+                              </target>
+                            </Target>
+                            <TargetProperty>
+                              <targetProperty>DepthBoundaries</targetProperty>
+                            </TargetProperty>
+                          </igs:LinkTarget>
+                          <igs:LinkTarget>
+                            <Target>
+                              <target>
+                                <sg:ParametricNode name="ParametricNode" />
+                              </target>
+                            </Target>
+                            <TargetProperty>
+                              <targetProperty>Setup</targetProperty>
+                            </TargetProperty>
+                          </igs:LinkTarget>
+                        </targets>
+                      </Links>
+                    </gui:CheckBox>
+                    <gui:CheckBox name="ParametricDisplayVisibleBoundaries">
+                      <Text>
+                        <text>Visible Boundaries</text>
+                      </Text>
+                      <Checked>
+                        <checked>false</checked>
+                      </Checked>
+                      <Links>
+                        <signalProperty>Checked</signalProperty>
+                        <targets>
+                          <igs:LinkTarget>
+                            <Target>
+                              <target>
+                                <sg:ParametricNode name="ParametricNode" />
+                              </target>
+                            </Target>
+                            <TargetProperty>
+                              <targetProperty>VisibleBoundaries</targetProperty>
+                            </TargetProperty>
+                          </igs:LinkTarget>
+                          <igs:LinkTarget>
+                            <Target>
+                              <target>
+                                <sg:ParametricNode name="ParametricNode" />
+                              </target>
+                            </Target>
+                            <TargetProperty>
+                              <targetProperty>Setup</targetProperty>
+                            </TargetProperty>
+                          </igs:LinkTarget>
+                        </targets>
+                      </Links>
+                    </gui:CheckBox>
                     <gui:Label>
                       <Text>
                         <text>Opacity</text>
