@@ -39,35 +39,14 @@
           <Load/>
         </sg:Model>
         <sg:ParametricNode name="ParametricNode">
+          <Shaders>
+            <shaders>
+              S:/dist/win32-vc12/openigs2/share/openigs/examples/osg/parametric/parametric-programmable.vert,S:/dist/win32-vc12/openigs2/share/openigs/examples/osg/parametric/parametric.frag
+            </shaders>
+          </Shaders>
           <GraphicsState>
             <graphicsState>
               <sg:GraphicsState name="ParametricState">
-                <Attributes>
-                  <attributes>
-                    <sg:Program name="ParametricProgram">
-                      <Shaders>
-                        <shaders>
-                          <sg:Shader name="ParametricVertexShader">
-                            <Type>
-                              <type>Vertex</type>
-                            </Type>
-                            <Filename>
-                              <filename>$OPENIGS_ROOT/share/openigs/examples/osg/parametric/parametric3.vert</filename>
-                            </Filename>
-                          </sg:Shader>
-                          <sg:Shader name="ParametricFragmentShader">
-                            <Type>
-                              <type>Fragment</type>
-                            </Type>
-                            <Filename>
-                              <filename>$OPENIGS_ROOT/share/openigs/examples/osg/parametric/parametric.frag</filename>
-                            </Filename>
-                          </sg:Shader>
-                        </shaders>
-                      </Shaders>
-                    </sg:Program>
-                  </attributes>
-                </Attributes>
                 <Uniforms>
                   <uniforms>
                     <sg:Uniform name="ParametricOpacity">
@@ -89,6 +68,12 @@
               </sg:GraphicsState>
             </graphicsState>
           </GraphicsState>
+          <ZTop>
+            <zTop>((x-x*x)*(y-y*y)*5.0+0.2*sin(osg_SimulationTime))</zTop>
+          </ZTop>
+          <ZBase>
+            <zBase>(-0.1*sin(x*y*6.28+osg_SimulationTime))</zBase>
+          </ZBase>
           <Dimensions>
             <width>800</width>
             <height>600</height>

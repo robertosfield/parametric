@@ -42,6 +42,7 @@ install(
     FILES
         ${CMAKE_SOURCE_DIR}/src/osgParametric/parametric.vert
         ${CMAKE_SOURCE_DIR}/src/osgParametric/parametric3.vert
+        ${CMAKE_SOURCE_DIR}/src/osgParametric/parametric-programmable.vert
         ${CMAKE_SOURCE_DIR}/src/osgParametric/parametric.frag
         ${CMAKE_SOURCE_DIR}/README.md
         guiparametric.igsml
