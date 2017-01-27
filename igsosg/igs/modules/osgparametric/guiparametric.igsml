@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openigs xmlns:igs="http://openigs.org/2009/igs"
+         xmlns:dbgui="http://openigs.org/2009/dbgui"
          xmlns:gui="http://openigs.org/2009/gui"
          xmlns:sg="http://openigs.org/2009/sg">
   <gui:Window name="ParametricWindow">
@@ -134,6 +135,31 @@
                         </targets>
                       </Links>
                     </gui:CheckBox>
+                    <gui:Label>
+                      <Text>
+                        <text>Shaders</text>
+                      </Text>
+                    </gui:Label>
+                    <gui:Button name="ParametricEnvironmentRefreshShaders">
+                      <Text>
+                        <text>Refresh</text>
+                      </Text>
+                      <Links>
+                        <signalProperty>Clicked</signalProperty>
+                        <targets>
+                          <igs:LinkTarget>
+                            <Target>
+                              <target>
+                                <sg:Shader name="ParametricVertexShader" />
+                              </target>
+                            </Target>
+                            <TargetProperty>
+                              <targetProperty>ReloadAll</targetProperty>
+                            </TargetProperty>
+                          </igs:LinkTarget>
+                        </targets>
+                      </Links>
+                    </gui:Button>
                   </children>
                 </Children>
               </gui:Frame>
@@ -436,6 +462,16 @@
       <visible>true</visible>
     </Visible>
   </gui:Container>
+  <gui:DockWindow name="OpenIGSDatabaseVisualizerDockWindow">
+    <Visible>
+      <visible>false</visible>
+    </Visible>
+  </gui:DockWindow>
+  <gui:DockWindow name="OpenIGSPropertyEditorDockWindow">
+    <Visible>
+      <visible>false</visible>
+    </Visible>
+  </gui:DockWindow>
   <gui:DockWindow name="OpenIGSLogWindowDockWindow">
     <Visible>
       <visible>false</visible>
