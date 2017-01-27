@@ -1,4 +1,7 @@
-<openigs>
+<?xml version="1.0" encoding="utf-8"?>
+<openigs xmlns:igs="http://openigs.org/2009/igs"
+         xmlns:gui="http://openigs.org/2009/gui"
+         xmlns:sg="http://openigs.org/2009/sg">
   <gui:Window name="ParametricWindow">
     <TitleText>
       <titleText>Parametric Demo</titleText>
@@ -307,7 +310,7 @@
                     </gui:Label>
                     <gui:TextField name="ParametricGeometryCells">
                       <Text>
-                        <text>25</text>
+                        <text parse="false">25, 25</text>
                       </Text>
                       <Links>
                         <signalProperty>EditingFinished</signalProperty>
@@ -331,6 +334,17 @@
                             <TargetProperty>
                               <targetProperty>Setup</targetProperty>
                             </TargetProperty>
+                            <Binding>
+                              <binding>
+                                <igs:Binding>
+                                  <Binding>
+                                    <param>numCells</param>
+                                    <expression>#@lt;</expression>
+                                    <hint>SourceParse</hint>
+                                  </Binding>
+                                </igs:Binding>
+                              </binding>
+                            </Binding>
                           </igs:LinkTarget>
                         </targets>
                       </Links>
