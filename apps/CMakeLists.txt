@@ -1,14 +1,14 @@
 # -----------------------------
-# osgparametricscene executable
+# parametric executable
 # -----------------------------
 
 ADD_EXECUTABLE(
-    osgparametricscene
-    osgparametricscene.cpp
+    parametric
+    parametric.cpp
 )
 
 TARGET_LINK_LIBRARIES(
-    osgparametricscene
+    parametric
     osgParametric
     ${OSG_LIBRARIES}
     ${OSGVIEWER_LIBRARIES}
@@ -19,13 +19,13 @@ TARGET_LINK_LIBRARIES(
 )
 
 SET_TARGET_PROPERTIES(
-    osgparametricscene
+    parametric
     PROPERTIES
     DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX}
 )
 
 INSTALL(
-    TARGETS osgparametricscene
+    TARGETS parametric
     RUNTIME DESTINATION bin COMPONENT Runtime
     LIBRARY DESTINATION lib COMPONENT Runtime
     ARCHIVE DESTINATION lib COMPONENT Development
