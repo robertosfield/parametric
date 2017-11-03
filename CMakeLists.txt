@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 2.8)
 
 PROJECT(parametric)
 
+set (CMAKE_CXX_STANDARD 11)
+
 set(CMAKE_DEBUG_POSTFIX "d" CACHE STRING "add a postfix, usually d on windows")
 set(BUILD_SHARED_LIBS ON CACHE BOOL "Build Shared libs")
 
