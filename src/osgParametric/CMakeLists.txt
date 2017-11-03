@@ -2,12 +2,10 @@ SET(TARGET osgParametric)
 
 SET(HEADERS
     Export
-    ParametricNode.h
     ParametricScene.h
 )
 
 SET(SOURCES
-    ParametricNode.cpp
     ParametricScene.cpp
 )
 
